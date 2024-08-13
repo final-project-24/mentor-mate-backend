@@ -1,0 +1,59 @@
+// Imports ==============================================
+
+import express from "express";
+import { verifyToken } from "../utils/tokenMiddleware.js";
+import {
+  validate,
+  signupValidator,
+  loginValidator,
+} from "../utils/validators.js";
+import {
+  getUsers,
+  userLogin,
+  userSignup,
+  verifyUserAuth,
+  userLogout,
+  // updateUser,
+  deleteUser,
+  initiatePasswordReset,
+  validateResetToken,
+  updatePassword,
+} from "../controllers/userController.js";
+
+// Routes =================================================
+
+const userRoutes = express.Router();
+
+// http://localhost:4000/app/user/get-users/
+userRoutes.get("/get-users", verifyToken, getUsers);
+
+// http://localhost:4000/app/user/signup/
+userRoutes.post("/signup", validate(signupValidator), userSignup);
+
+// http://localhost:4000/app/user/login/
+userRoutes.post("/login", validate(loginValidator), userLogin);
+
+// http://localhost:4000/app/user/auth/
+userRoutes.get("/auth", verifyToken, verifyUserAuth);
+
+// http://localhost:4000/app/user/logout/
+userRoutes.get("/logout", verifyToken, userLogout);
+
+// http://localhost:4000/app/user/:id
+// userRoutes.post("/update/:id", verifyToken, updateUser);
+
+// http://localhost:4000/app/user/:id
+userRoutes.delete("/:id", verifyToken, deleteUser);
+
+// http://localhost:4000/app/user/forgot-password
+userRoutes.post("/forgot-password", initiatePasswordReset);
+
+// http://localhost:4000/app/user/reset-password/:token
+userRoutes.get("/reset-password/:token", validateResetToken);
+
+// http://localhost:4000/app/user/reset-password/:token
+userRoutes.post("/reset-password/:token", updatePassword);
+
+// Exports ==============================================
+
+export default userRoutes;

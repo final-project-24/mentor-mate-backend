@@ -1,0 +1,20 @@
+# npm install:  to get all the dependencies
+# would take unnecessary space in the repository!
+node_modules
+
+# npm run build / npm run dev: to get the dist folder
+# we need it bc of the compiled code (typescript -> javascript)!
+dist
+
+# check out .env-example for the environment variables
+# our secret keys!
+.env
+
+# macOS files to ignore: not necessary for the project
+# could potentially lead to merge conflicts!
+.DS_Store
+
+# notes and backup
+NOTES.md
+backup/
+test/
