@@ -9,7 +9,16 @@ import nodemailer from "nodemailer";
 // Models ------------------------------------------
 
 import userModel from "../models/userModel.js";
-import { COOKIE_NAME, BASE_URL, PORT, DOMAIN, BACKEND_URL, EMAIL_USER, EMAIL_PASS } from "../utils/config.js";
+import {
+  NODE_ENV,
+  COOKIE_NAME,
+  BASE_URL,
+  PORT,
+  DOMAIN,
+  BACKEND_URL,
+  EMAIL_USER,
+  EMAIL_PASS,
+} from "../utils/config.js";
 import { setAuthCookie } from "../utils/authHelpers.js";
 import { errorHandlerMiddleware } from "../middleware/errorHandlerMiddleware.js";
 
@@ -180,6 +189,8 @@ export const userLogout = async (
       domain: DOMAIN,
       signed: true,
       path: "/",
+      secure: NODE_ENV === "production", // Set secure flag in production
+      sameSite: "strict", // Adjust sameSite attribute as needed
     }); // Clear the auth cookie
 
     console.log("✅ User logout successful:", user);
