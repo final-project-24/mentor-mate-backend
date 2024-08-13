@@ -4,8 +4,24 @@
 // Imports ========================================
 
 import { Response } from "express"; // Typescript types
-import { createToken } from "./tokenMiddleware.js";
-import { COOKIE_NAME, DOMAIN } from "./config.js";
+import { COOKIE_NAME, DOMAIN, JWT_SECRET } from "./config.js";
+import jwt from "jsonwebtoken";
+
+// Create a token =================================
+
+export const createToken = (
+  id: string,
+  email: string,
+  expiresIn: string,
+  role: string
+) => {
+  console.log("🔑 Creating token (/utils/tokenMiddleware.ts)");
+  const payload = { id, email, role };
+  const token = jwt.sign(payload, JWT_SECRET, {
+    expiresIn,
+  });
+  return token;
+};
 
 // Set the authentication cookie =================
 

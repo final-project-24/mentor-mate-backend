@@ -8,22 +8,6 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET, COOKIE_NAME } from "./config.js";
 
-// Create a token =================================
-
-export const createToken = (
-  id: string,
-  email: string,
-  expiresIn: string,
-  role: string
-) => {
-  console.log("🔑 Creating token (/utils/tokenMiddleware.ts)");
-  const payload = { id, email, role };
-  const token = jwt.sign(payload, JWT_SECRET, {
-    expiresIn,
-  });
-  return token;
-};
-
 // Verify a token =================================
 // + extract the userId from the token payload
 // + extract the userRole from the token payload (RBAC)
