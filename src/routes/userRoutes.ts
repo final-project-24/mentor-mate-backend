@@ -6,7 +6,7 @@ import {
   validate,
   signupValidator,
   loginValidator,
-} from "../utils/validators.js";
+} from "../middleware/validatorMiddleware.js";
 import {
   getUsers,
   userLogin,
