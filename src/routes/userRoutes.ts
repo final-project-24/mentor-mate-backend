@@ -2,11 +2,11 @@
 
 import express from "express";
 import { verifyToken } from "../middleware/verifyTokenMiddleware.js";
+import { validate } from "../middleware/validatorMiddleware.js";
 import {
-  validate,
   signupValidator,
   loginValidator,
-} from "../middleware/validatorMiddleware.js";
+} from "../middleware/validationChains/authValidationChain.js";
 import {
   getUsers,
   userLogin,
@@ -19,6 +19,7 @@ import {
   validateResetToken,
   updatePassword,
 } from "../controllers/userController.js";
+
 
 // Routes =================================================
 
