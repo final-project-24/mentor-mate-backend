@@ -9,7 +9,7 @@ import nodemailer from "nodemailer";
 // Models ------------------------------------------
 
 import userModel from "../models/userModel.js";
-import { COOKIE_NAME, BASE_URL, PORT, DOMAIN } from "../utils/config.js";
+import { COOKIE_NAME, BASE_URL, PORT, DOMAIN, BACKEND_URL, EMAIL_USER, EMAIL_PASS } from "../utils/config.js";
 import { setAuthCookie } from "../utils/authHelpers.js";
 import { errorHandlerMiddleware } from "../middleware/errorHandlerMiddleware.js";
 
@@ -47,7 +47,7 @@ export const userSignup = async (
 
     const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
 
-    const userProfileImage = image || `${BASE_URL}${PORT}/images/avatar.svg`; // Default image
+    const userProfileImage = image || `${BACKEND_URL}/images/avatar.svg`; // Default image
 
     const user = new userModel({
       userName,
@@ -259,14 +259,14 @@ export const initiatePasswordReset = async (
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: EMAIL_USER,
+        pass: EMAIL_PASS,
       },
     });
 
     const mailOptions = {
       to: user.email,
-      from: process.env.EMAIL_USER,
+      from: EMAIL_USER,
       subject: "Password Reset",
       text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
         Please click on the following link, or paste this into your browser to complete the process:\n\n
