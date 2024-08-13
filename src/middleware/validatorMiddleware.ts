@@ -4,7 +4,7 @@
 // Imports =========================================
 
 import { Request, Response, NextFunction } from "express";
-import { body, ValidationChain, validationResult } from "express-validator";
+import { ValidationChain, validationResult } from "express-validator";
 import userModel from "../models/userModel.js";
 
 // Validate Function ===============================
@@ -39,27 +39,3 @@ export const validate = (validations: ValidationChain[]) => {
 //     return Promise.reject('Email already in use');
 //   }
 // });
-
-// Login Validator --------------------------------
-
-export const loginValidator = [
-  body("email").trim().isEmail().withMessage("Email is required"),
-  body("password")
-    .trim()
-    .isLength({ min: 4 })
-    .withMessage("Password should contain at least 4 characters"),
-];
-
-// Signup Validator -------------------------------
-
-export const signupValidator = [
-  body("userName").notEmpty().withMessage("Name is required"),
-  // emailNotExistsValidator,
-  ...loginValidator,
-  body("confirmPassword").custom((value, { req }) => {
-    if (value !== req.body.password) {
-      throw new Error("Password confirmation does not match password");
-    }
-    return true;
-  }),
-];
