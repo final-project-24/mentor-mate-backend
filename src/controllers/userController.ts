@@ -11,7 +11,7 @@ import nodemailer from "nodemailer";
 import userModel from "../models/userModel.js";
 import { COOKIE_NAME, BASE_URL, PORT, DOMAIN } from "../utils/config.js";
 import { setAuthCookie } from "../utils/authHelpers.js";
-import { errorHandlerMiddleware } from "../utils/errorHandlerMiddleware.js";
+import { errorHandlerMiddleware } from "../middleware/errorHandlerMiddleware.js";
 
 // Controller functions ============================
 
