@@ -190,7 +190,7 @@ export const userLogout = async (
       signed: true,
       path: "/",
       secure: NODE_ENV === "production", // Set secure flag in production
-      sameSite: "strict", // Adjust sameSite attribute as needed
+      sameSite: "none", // Set sameSite to None for cross-site cookies
     }); // Clear the auth cookie
 
     console.log("✅ User logout successful:", user);
