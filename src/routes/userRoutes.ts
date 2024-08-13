@@ -1,7 +1,7 @@
 // Imports ==============================================
 
 import express from "express";
-import { verifyToken } from "../utils/tokenMiddleware.js";
+import { verifyToken } from "../middleware/verifyTokenMiddleware.js";
 import {
   validate,
   signupValidator,

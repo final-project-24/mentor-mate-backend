@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyToken } from '../utils/tokenMiddleware.js';
+import { verifyToken } from '../middleware/verifyTokenMiddleware.js';
 import { getMentorAvailability, addCalendarEvent, bookCalendarEvent } from '../controllers/calendarController.js';
 
 const calendarRoutes = express.Router();
