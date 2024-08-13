@@ -1,11 +1,17 @@
 // /utils/config.ts
 // Load environment variables and set defaults
 
+// authHelpers.ts / userController.ts (Logout)
+export const NODE_ENV = process.env.NODE_ENV || "development";
+
 // db.ts
 export const MONGODB_URI = process.env.MONGODB_URI;
 
 // db.ts
 export const DEFAULT_DB_NAME = process.env.DEFAULT_DB_NAME || "dev";
+
+// db.ts
+export const PROD_DB_NAME = process.env.PROD_DB_NAME || "prod";
 
 // verifyTokenMiddleware.ts / authHelpers.ts
 export const JWT_SECRET = process.env.JWT_SECRET;

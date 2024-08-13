@@ -4,7 +4,7 @@
 // Imports ========================================
 
 import { Response } from "express"; // Typescript types
-import { COOKIE_NAME, DOMAIN, JWT_SECRET } from "./config.js";
+import { COOKIE_NAME, DOMAIN, JWT_SECRET, NODE_ENV } from "./config.js";
 import jwt from "jsonwebtoken";
 
 // Create a token =================================
@@ -25,12 +25,19 @@ export const createToken = (
 
 // Set the authentication cookie =================
 
-export const setAuthCookie = (res: Response, userId: string, email: string, role: string ) => {
+export const setAuthCookie = (
+  res: Response,
+  userId: string,
+  email: string,
+  role: string
+) => {
   res.clearCookie(COOKIE_NAME, {
     httpOnly: true,
     domain: DOMAIN,
     signed: true,
     path: "/",
+    secure: NODE_ENV === "production", // Set secure flag in production
+    sameSite: "strict", // Adjust sameSite attribute as needed
   }); // Clear the cookie before setting it again
 
   const token = createToken(userId, email, "7d", role); // Create a token that expires in 7 days
@@ -43,5 +50,7 @@ export const setAuthCookie = (res: Response, userId: string, email: string, role
     expires,
     httpOnly: true,
     signed: true,
+    secure: NODE_ENV === "production", // Set secure flag in production
+    sameSite: "strict", // Adjust sameSite attribute as needed
   }); // Set the cookie with the new token
 };

@@ -9,7 +9,7 @@ import { fileURLToPath } from "url";
 import cors from "cors";
 import cookie from "cookie-parser";
 import { logMiddleware } from "./middleware/logMiddleware.js";
-import { dbMiddleware } from "./middleware/dbMiddleware.js";
+// import { dbMiddleware } from "./middleware/dbMiddleware.js";
 import { COOKIE_SECRET, FRONTEND_URL } from "./utils/config.js";
 import appRouter from "./routes/appRouter.js";
 
@@ -38,7 +38,7 @@ app.use(express.static(path.join(__dirname, "../public"))); // Serve static file
 
 app.use(logMiddleware); // HTTP request logger custom middleware with additional info - remove for production
 
-app.use(dbMiddleware); // // Change database: Call the connect function based on the db name extracted from the request headers to connect to the appropriate database
+// app.use(dbMiddleware); // // Change database: Call the connect function based on the db name extracted from the request headers to connect to the appropriate database
 
 // Main Route Handler -------------------------------
 

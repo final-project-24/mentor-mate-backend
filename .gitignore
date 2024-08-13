@@ -9,6 +9,7 @@ dist
 # check out .env-example for the environment variables
 # our secret keys!
 .env
+.env-prod
 
 # macOS files to ignore: not necessary for the project
 # could potentially lead to merge conflicts!
