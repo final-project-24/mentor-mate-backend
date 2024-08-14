@@ -1,6 +1,7 @@
 // Imports =========================================
 
 import mongoose from "mongoose";
+import { NODE_ENV } from "../utils/config.js";
 
 // Schema ==========================================
 
@@ -26,8 +27,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
-      default: "user",
-      enum: ["user", "mentor", "mentee"],
+      enum: ['admin', 'mentor', 'mentee']
     },
     skills: [
       {
