@@ -2,15 +2,15 @@ import express from 'express';
 import { verifyToken } from '../middleware/verifyTokenMiddleware.js';
 import { submitFeedback, getFeedbacks } from '../controllers/feedbackController.js';
 
-const feedbackRouter = express.Router();
+const feedbackRoutes = express.Router();
 
-// Route to submit feedback; protected by token verification
-feedbackRouter.post('/', verifyToken, submitFeedback);
+// POST /feedback/ - Submit feedback (protected by token verification)
+feedbackRoutes.post('/', verifyToken, submitFeedback);
 
-// Route to get all feedbacks; can be modified as needed (protected or public)
-feedbackRouter.get('/', verifyToken, getFeedbacks);
+// GET /feedback/ - Get all feedback (protected by token verification)
+feedbackRoutes.get('/', verifyToken, getFeedbacks);
 
-export default feedbackRouter;
+export default feedbackRoutes;
 
 
 
