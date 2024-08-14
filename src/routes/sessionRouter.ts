@@ -1,9 +1,10 @@
 import express from 'express';
-import { verifyToken } from '../middleware/verifyTokenMiddleware.js'; 
-import { getSession } from '../controllers/sessionController.js'; 
+const sessionRoutes = express.Router();
 
-const sessionRouter = express.Router();
+sessionRoutes.get('/', (req, res) => {
+  // Logic to fetch session data
+  res.json({ id: 1, name: 'Sample Session' });
+});
 
-sessionRouter.get('/session', verifyToken, getSession);
+export default sessionRoutes;
 
-export default sessionRouter;
