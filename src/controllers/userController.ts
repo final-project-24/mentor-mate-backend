@@ -190,7 +190,7 @@ export const userLogout = async (
       signed: true,
       path: "/",
       secure: NODE_ENV === "production", // Set secure flag in production
-      sameSite: NODE_ENV === "production" ? "none" : "lax", // Adjust sameSite attribute as needed: strict, lax, none
+      // sameSite: NODE_ENV === "production" ? "none" : "lax", // Adjust sameSite attribute as needed: strict, lax, none
     }); // Clear the auth cookie
 
     console.log("✅ User logout successful:", user);
@@ -236,7 +236,7 @@ export const deleteUser = async (
       signed: true,
       path: "/",
       secure: NODE_ENV === "production", // Set secure flag in production
-      sameSite: NODE_ENV === "production" ? "none" : "lax", // Adjust sameSite attribute as needed: strict, lax, none
+      // sameSite: NODE_ENV === "production" ? "none" : "lax", // Adjust sameSite attribute as needed: strict, lax, none
     }); // Clear the auth cookie
 
     console.log("✅ User deleted successfully:", user);
