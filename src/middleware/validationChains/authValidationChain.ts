@@ -5,7 +5,6 @@ import { body } from 'express-validator'
 export const loginValidator = [
   body("email").trim().isEmail().withMessage("Email is required"),
   body("password")
-    .trim()
     .isLength({ min: 4 })
     .withMessage("Password should contain at least 4 characters"),
 ];
@@ -22,4 +21,10 @@ export const signupValidator = [
     }
     return true;
   }),
+  body('role').custom(value => {
+    if (value === 'admin') {
+      throw new Error('Something went wrong, try again!')
+    }
+    return true
+  })
 ];
