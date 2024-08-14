@@ -37,7 +37,7 @@ export const setAuthCookie = (
     signed: true,
     path: "/",
     secure: NODE_ENV === "production", // Set secure flag in production
-    sameSite: NODE_ENV === "production" ? "none" : "lax", // Adjust sameSite attribute as needed: strict, lax, none
+    // sameSite: NODE_ENV === "production" ? "none" : "lax", // Adjust sameSite attribute as needed: strict, lax, none
   }); // Clear the cookie before setting it again
 
   const token = createToken(userId, email, "7d", role); // Create a token that expires in 7 days
@@ -51,6 +51,6 @@ export const setAuthCookie = (
     httpOnly: true,
     signed: true,
     secure: NODE_ENV === "production", // Set secure flag in production
-    sameSite: NODE_ENV === "production" ? "none" : "lax", // Adjust sameSite attribute as needed: strict, lax, none
+    // sameSite: NODE_ENV === "production" ? "none" : "lax", // Adjust sameSite attribute as needed: strict, lax, none
   }); // Set the cookie with the new token
 };
