@@ -22,4 +22,10 @@ export const signupValidator = [
     }
     return true;
   }),
+  body('role').custom(value => {
+    if (value === 'admin') {
+      throw new Error('Something went wrong, try again!')
+    }
+    return true
+  })
 ];
