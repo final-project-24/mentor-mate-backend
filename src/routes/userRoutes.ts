@@ -18,6 +18,7 @@ import {
   initiatePasswordReset,
   validateResetToken,
   updatePassword,
+  updateUserRole,
 } from "../controllers/userController.js";
 
 
@@ -54,6 +55,9 @@ userRoutes.get("/reset-password/:token", validateResetToken);
 
 // http://localhost:4000/app/user/reset-password/:token
 userRoutes.post("/reset-password/:token", updatePassword);
+
+// http://localhost:4000/app/user/update-role
+userRoutes.put("/update-role", verifyToken, updateUserRole);
 
 // Exports ==============================================
 

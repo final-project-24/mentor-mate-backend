@@ -77,6 +77,7 @@ export const userSignup = async (
       userName: user.userName,
       email: user.email,
       role: user.role,
+      originalRole: user.originalRole, // Include original role if available
       image: user.image,
     }); // Send success response
   } catch (error) {
@@ -114,8 +115,9 @@ export const userLogin = async (
       userName: user.userName,
       email: user.email,
       role: user.role,
+      originalRole: user.originalRole, // Include original role if available
       image: user.image,
-    });
+    }); // Send success response
   } catch (error) {
     console.log("❌ Error during user login:", error);
     return res.status(200).json({ message: "ERROR", cause: error.message });
@@ -150,8 +152,9 @@ export const verifyUserAuth = async (
       userName: user.userName,
       email: user.email,
       role: user.role,
+      originalRole: user.originalRole, // Include original role if available
       image: user.image,
-    });
+    }); // Send success response
   } catch (error) {
     console.error("❌ Error verifying user:", error);
     return res
@@ -368,5 +371,69 @@ export const updatePassword = async (
   } catch (err) {
     console.error("❌ Error in resetting password:", err);
     res.status(500).send("Error in resetting password.");
+  }
+};
+
+// Update User Role: user/update-role -------------------
+
+export const updateUserRole = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("🔍 Incoming request to update user role:", req.body);
+
+  try {
+    // Check if the user is an admin
+    if (req.userRole !== "admin") {
+      console.log("❌ Access denied. User is not an admin:", req.userRole);
+      return res.status(403).json({ message: "Access denied. Admins only." });
+    }
+
+    const { newRole } = req.body;
+    const userId = req.userId; // Extract userId from the token
+    console.log("🔍 User ID:", userId, "New Role:", newRole);
+
+    // Check if the new role is valid
+    const validRoles = ["admin", "mentor", "mentee"];
+    if (!validRoles.includes(newRole)) {
+      console.log("❌ Invalid role:", newRole);
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    // Find the user by ID
+    const user = await userModel.findById(userId);
+    if (!user) {
+      console.log("❌ User not found:", userId);
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    console.log("🔍 Found user:", user);
+
+    // Preserve the original role if not already set
+    if (!user.originalRole) {
+      user.originalRole = user.role;
+      console.log("🔍 Preserving original role:", user.role);
+    }
+
+    // Update the role
+    user.role = newRole;
+    await user.save();
+
+    console.log("✅ User role updated successfully:", user);
+    return res.status(200).json({
+      message: "User role updated",
+      id: user._id,
+      userName: user.userName,
+      email: user.email,
+      role: user.role,
+      originalRole: user.originalRole,
+      image: user.image,
+    });
+  } catch (error) {
+    console.error("❌ Error updating user role:", error);
+    return res
+      .status(500)
+      .json({ message: "Server error", cause: error.message });
   }
 };
