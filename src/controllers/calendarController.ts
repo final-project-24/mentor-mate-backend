@@ -1,7 +1,7 @@
 import Calendar from "../models/calendarModel.js";
 import User from "../models/userModel.js";
 
-// Get available slots for a specific mentor
+// Get available slots for a specific mentor ----------------------------------
 export const getMentorAvailability = async (req, res) => {
   try {
     const mentorId = req.params.mentorId;
@@ -35,7 +35,7 @@ export const getMentorAvailability = async (req, res) => {
   }
 };
 
-// Add a new calendar event (mentor adds available time slot)
+// Add a new calendar event (mentor adds available time slot) ------------------
 export const addCalendarEvent = async (req, res) => {
   try {
     if (req.userRole !== "mentor") {
@@ -58,7 +58,7 @@ export const addCalendarEvent = async (req, res) => {
   }
 };
 
-// Book a calendar event (mentee books a slot)
+// Book a calendar event (mentee books a slot) --------------------------------
 export const bookCalendarEvent = async (req, res) => {
   try {
     if (req.userRole !== "mentee") {
@@ -80,5 +80,28 @@ export const bookCalendarEvent = async (req, res) => {
   } catch (error) {
     console.error("Error booking calendar event:", error);
     res.status(500).json({ message: error.message });
+  }
+};
+
+// booking details --------------------------------
+
+export const getBookingDetails = async (req, res) => {
+  try {
+    console.log("Fetching booking details for ID:", req.params.id);
+
+    const booking = await Calendar.findById(req.params.id)
+      .populate("userId", "userName") // Populate mentor information
+      .populate("bookedBy", "userName"); // Populate user who booked information
+
+    if (!booking) {
+      console.log("Booking not found for ID:", req.params.id);
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    console.log("Booking details found:", booking);
+    res.json(booking);
+  } catch (error) {
+    console.error("Error fetching booking details:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };

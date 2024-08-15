@@ -1,11 +1,24 @@
-import express from 'express';
-import { verifyToken } from '../middleware/verifyTokenMiddleware.js';
-import { getMentorAvailability, addCalendarEvent, bookCalendarEvent } from '../controllers/calendarController.js';
+import express from "express";
+import { verifyToken } from "../middleware/verifyTokenMiddleware.js";
+import {
+  getMentorAvailability,
+  addCalendarEvent,
+  bookCalendarEvent,
+  getBookingDetails,
+} from "../controllers/calendarController.js";
 
 const calendarRoutes = express.Router();
 
-calendarRoutes.get('/:mentorId', verifyToken, getMentorAvailability);
-calendarRoutes.post('/', verifyToken, addCalendarEvent);
-calendarRoutes.post('/book/:id', verifyToken, bookCalendarEvent);
+// http://localhost:4000/app/calendar/:mentorId
+calendarRoutes.get("/:mentorId", verifyToken, getMentorAvailability);
+
+// http://localhost:4000/app/calendar/
+calendarRoutes.post("/", verifyToken, addCalendarEvent);
+
+// http://localhost:4000/app/calendar/book/:id
+calendarRoutes.post("/book/:id", verifyToken, bookCalendarEvent);
+
+// http://localhost:4000/app/calendar/booking-details/:id
+calendarRoutes.get("/booking-details/:id", getBookingDetails);
 
 export default calendarRoutes;

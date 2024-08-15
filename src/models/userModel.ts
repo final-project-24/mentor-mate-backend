@@ -30,12 +30,6 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "mentor", "mentee"],
     },
     originalRole: { type: String }, // New field to store the original role
-    // role: {
-    //   type: [String],
-    //   required: true,
-    //   enum: ["admin", "mentor", "mentee"],
-    //   default: ["mentee"],
-    // },
     skills: [
       {
         type: mongoose.Schema.Types.ObjectId,
