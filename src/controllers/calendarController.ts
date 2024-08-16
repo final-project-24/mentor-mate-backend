@@ -90,8 +90,8 @@ export const getBookingDetails = async (req, res) => {
     console.log("Fetching booking details for ID:", req.params.id);
 
     const booking = await Calendar.findById(req.params.id)
-      .populate("userId", "userName") // Populate mentor information
-      .populate("bookedBy", "userName"); // Populate user who booked information
+      .populate("userId", "image userName role skills") // mentor: populate method to get access to user model
+      .populate("bookedBy", "userName email"); // mentee: populate method to get access to user model
 
     if (!booking) {
       console.log("Booking not found for ID:", req.params.id);
