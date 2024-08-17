@@ -27,8 +27,9 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
-      enum: ['admin', 'mentor', 'mentee']
+      enum: ["admin", "mentor", "mentee"],
     },
+    originalRole: { type: String }, // New field to store the original role
     skills: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -60,4 +61,3 @@ const userModel = mongoose.model("User", userSchema, "users");
 // Export ==========================================
 
 export default userModel;
-
