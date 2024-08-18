@@ -437,3 +437,7 @@ export const updateUserRole = async (
       .json({ message: "Server error", cause: error.message });
   }
 };
+
+// Chore: Implement the following controller functions:
+
+// updateUserRole - Update the role of a user (admin only), for better development experience.

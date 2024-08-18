@@ -22,7 +22,8 @@ export const getMentorAvailability = async (req, res) => {
     }
 
     const availableSlots = await Calendar.find({
-      userId: mentorId,
+      // userId: mentorId,
+      mentorId: mentorId, // Changed from userId to mentorId
       status: "available",
       start: { $gte: startDate },
       end: { $lte: endDate },
@@ -46,7 +47,8 @@ export const addCalendarEvent = async (req, res) => {
 
     const newEvent = new Calendar({
       ...req.body,
-      userId: req.userId,
+      // userId: req.userId,
+      mentorId: req.userId, // Changed from userId to mentorId
       status: "available",
     });
     const savedEvent = await newEvent.save();
@@ -73,7 +75,8 @@ export const bookCalendarEvent = async (req, res) => {
     }
 
     event.status = "booked";
-    event.bookedBy = req.userId;
+    // event.bookedBy = req.userId;
+    event.menteeId = req.userId; // Changed from bookedBy to menteeId
     const updatedEvent = await event.save();
     console.log("Calendar event booked:", updatedEvent);
     res.status(200).json(updatedEvent);
@@ -90,8 +93,10 @@ export const getBookingDetails = async (req, res) => {
     console.log("Fetching booking details for ID:", req.params.id);
 
     const booking = await Calendar.findById(req.params.id)
-      .populate("userId", "image userName role skills") // mentor: populate method to get access to user model
-      .populate("bookedBy", "userName email"); // mentee: populate method to get access to user model
+      // .populate("userId", "image userName role skills") // mentor: populate method to get access to user model
+      // .populate("bookedBy", "userName email"); // mentee: populate method to get access to user model
+      .populate("mentorId", "image userName role skills") // Changed from userId to mentorId
+      .populate("menteeId", "userName email"); // Changed from bookedBy to menteeId
 
     if (!booking) {
       console.log("Booking not found for ID:", req.params.id);
