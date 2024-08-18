@@ -1,6 +1,7 @@
 // Imports =========================================
 
 import bcrypt from "bcryptjs"; // Hashing passwords
+import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
 import { Request, Response, NextFunction } from "express"; // Import types (Typescript)
 
 import crypto from "crypto";
@@ -25,6 +26,7 @@ import { errorHandlerMiddleware } from "../middleware/errorHandlerMiddleware.js"
 // Controller functions ============================
 
 // Get users -------------------------------------
+// =========== modify this to only show certain fields ===========!!!!!!!!!!!!!!!!!!!!!!!!
 
 export const getUsers = async (
   req: Request,
@@ -64,6 +66,7 @@ export const userSignup = async (
       password: hashedPassword,
       role,
       image: userProfileImage,
+      uuid: uuidv4(), // Generate and include a UUID
     }); // Create a new user instance
 
     await user.save(); // Save user to database
@@ -73,12 +76,13 @@ export const userSignup = async (
     console.log("✅ User signup successful:", user);
     return res.status(201).json({
       message: "New User",
-      id: user._id,
+      id: user._id, // exclude this if not needed
       userName: user.userName,
       email: user.email,
       role: user.role,
       originalRole: user.originalRole, // Include original role if available
       image: user.image,
+      uuid: user.uuid, // Include UUID in the response // exclude this if not needed
     }); // Send success response
   } catch (error) {
     console.log("❌ Error during user signup:", error);
@@ -111,12 +115,13 @@ export const userLogin = async (
     console.log("✅ User login successful:", user);
     return res.status(200).json({
       message: "Welcome Back",
-      id: user._id,
+      id: user._id, // exclude this if not needed
       userName: user.userName,
       email: user.email,
       role: user.role,
       originalRole: user.originalRole, // Include original role if available
       image: user.image,
+      uuid: user.uuid, // Include UUID in the response // exclude this if not needed
     }); // Send success response
   } catch (error) {
     console.log("❌ Error during user login:", error);
@@ -148,12 +153,13 @@ export const verifyUserAuth = async (
 
     return res.status(200).json({
       message: "User Verified",
-      id: user._id,
+      id: user._id, // exclude this if not needed
       userName: user.userName,
       email: user.email,
       role: user.role,
       originalRole: user.originalRole, // Include original role if available
       image: user.image,
+      uuid: user.uuid, // Include UUID in the response // exclude this if not needed
     }); // Send success response
   } catch (error) {
     console.error("❌ Error verifying user:", error);

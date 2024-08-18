@@ -1,12 +1,18 @@
 // Imports =========================================
 
 import mongoose from "mongoose";
+import { v4 as uuidv4 } from "uuid"; // use uuidv4() to generate a unique id
 import { NODE_ENV } from "../utils/config.js";
 
 // Schema ==========================================
 
 const userSchema = new mongoose.Schema(
   {
+    uuid: {
+      type: String,
+      default: uuidv4,
+      unique: true,
+    }, // Add a new field to store the unique id
     userName: {
       type: String,
       required: true,
