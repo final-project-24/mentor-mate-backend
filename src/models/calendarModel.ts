@@ -6,7 +6,12 @@ const calendarSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
-  }, // Changed from userId to mentorId
+  },
+  mentorUuid: {
+    type: String,
+    required: true,
+    index: true, // Add an index for performance
+  },
   title: { type: String, required: true },
   description: { type: String },
   start: { type: Date, required: true },
@@ -14,6 +19,7 @@ const calendarSchema = new mongoose.Schema({
   status: { type: String, enum: ["available", "booked"], default: "available" },
   // bookedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   menteeId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Changed from bookedBy to menteeId
+  menteeUuid: { type: String, index: true }, // Add an index for performance
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
