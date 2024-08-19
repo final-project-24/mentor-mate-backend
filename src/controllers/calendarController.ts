@@ -4,26 +4,27 @@ import User from "../models/userModel.js";
 // Get available slots for a specific mentor ===================================
 export const getMentorAvailability = async (req, res) => {
   try {
-    const mentorId = req.params.mentorId;
+    console.log("🔎 Request received for mentor availability");
+
+    let mentorUuid = req.params.mentorUuid; // Use mentorUuid if provided
+    let mentorId = req.userId; // Use userId from the request
+
+    console.log("🔎 Mentor UUID from params:", mentorUuid);
+    console.log("🔎 Mentor ID from request:", mentorId);
+
+    // Determine the mentor identifier to use
+    if (!mentorUuid && req.userRole === "mentor") {
+      console.log("🔎 Using userId as mentorId:", mentorId);
+    }
+
     const startDate = new Date(req.query.start);
     const endDate = new Date(req.query.end);
+    console.log("🔎 Start Date:", startDate);
+    console.log("🔎 End Date:", endDate);
 
-    // Validate that the requested mentor exists and is indeed a mentor
-    const mentor = await User.findOne({ _id: mentorId, role: "mentor" });
-    if (!mentor) {
-      return res.status(404).json({ message: "Mentor not found" });
-    }
-
-    // Check if the requesting user is a mentee + Allow mentors to view their own availability
-    if (req.userRole !== "mentee" && req.userId !== mentorId) {
-      return res
-        .status(403)
-        .json({ message: "Only mentees can view mentor availability." });
-    }
-
+    // Fetch available slots directly from the Calendar model
     const availableSlots = await Calendar.find({
-      // userId: mentorId,
-      mentorId: mentorId, // Changed from userId to mentorId
+      $or: [{ mentorId: mentorId }, { mentorUuid: mentorUuid }],
       status: "available",
       start: { $gte: startDate },
       end: { $lte: endDate },
