@@ -1,12 +1,18 @@
 // Imports =========================================
 
 import mongoose from "mongoose";
+import { v4 as uuidv4 } from "uuid"; // use uuidv4() to generate a unique id
 import { NODE_ENV } from "../utils/config.js";
 
 // Schema ==========================================
 
 const userSchema = new mongoose.Schema(
   {
+    uuid: {
+      type: String,
+      default: uuidv4,
+      unique: true,
+    }, // Add a new field to store the unique id
     userName: {
       type: String,
       required: true,
@@ -27,8 +33,9 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
-      enum: ['admin', 'mentor', 'mentee']
+      enum: ["admin", "mentor", "mentee"],
     },
+    originalRole: { type: String }, // New field to store the original role
     skills: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -60,4 +67,3 @@ const userModel = mongoose.model("User", userSchema, "users");
 // Export ==========================================
 
 export default userModel;
-

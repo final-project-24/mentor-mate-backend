@@ -1,19 +1,13 @@
-// Imports =========================================
+// userController.ts
 
 import bcrypt from "bcryptjs"; // Hashing passwords
-import { Request, Response, NextFunction } from "express"; // Import types (Typescript)
-
+import { v4 as uuidv4 } from "uuid"; // Generate unique IDs
 import crypto from "crypto";
 import nodemailer from "nodemailer";
-
-// Models ------------------------------------------
-
-import userModel from "../models/userModel.js";
+import { Request, Response, NextFunction } from "express"; // Import types (Typescript)
 import {
   NODE_ENV,
   COOKIE_NAME,
-  BASE_URL,
-  PORT,
   DOMAIN,
   BACKEND_URL,
   EMAIL_USER,
@@ -21,10 +15,11 @@ import {
 } from "../utils/config.js";
 import { setAuthCookie } from "../utils/authHelpers.js";
 import { errorHandlerMiddleware } from "../middleware/errorHandlerMiddleware.js";
+import userModel from "../models/userModel.js";
 
-// Controller functions ============================
+// Get users ========================================
 
-// Get users -------------------------------------
+// ugiugiu exclude sensitive information !!!!
 
 export const getUsers = async (
   req: Request,
@@ -41,7 +36,7 @@ export const getUsers = async (
   }
 };
 
-// Signup -----------------------------------------
+// Signup ===========================================
 
 export const userSignup = async (
   req: Request,
@@ -64,6 +59,7 @@ export const userSignup = async (
       password: hashedPassword,
       role,
       image: userProfileImage,
+      uuid: uuidv4(), 
     }); // Create a new user instance
 
     await user.save(); // Save user to database
@@ -73,10 +69,12 @@ export const userSignup = async (
     console.log("✅ User signup successful:", user);
     return res.status(201).json({
       message: "New User",
-      id: user._id,
+      // id: user._id, // exclude this if not needed
+      uuid: user.uuid, 
       userName: user.userName,
       email: user.email,
       role: user.role,
+      originalRole: user.originalRole, // Include original role if available
       image: user.image,
     }); // Send success response
   } catch (error) {
@@ -85,7 +83,7 @@ export const userSignup = async (
   }
 };
 
-// Login ------------------------------------------
+// Login ============================================
 
 export const userLogin = async (
   req: Request,
@@ -110,19 +108,21 @@ export const userLogin = async (
     console.log("✅ User login successful:", user);
     return res.status(200).json({
       message: "Welcome Back",
-      id: user._id,
+      // id: user._id, // exclude this if not needed
+      uuid: user.uuid, 
       userName: user.userName,
       email: user.email,
       role: user.role,
+      originalRole: user.originalRole, // Include original role if available
       image: user.image,
-    });
+    }); // Send success response
   } catch (error) {
     console.log("❌ Error during user login:", error);
     return res.status(200).json({ message: "ERROR", cause: error.message });
   }
 };
 
-// Verify user auth ------------------------------------
+// Verify user auth =================================
 
 export const verifyUserAuth = async (
   req: Request,
@@ -146,12 +146,14 @@ export const verifyUserAuth = async (
 
     return res.status(200).json({
       message: "User Verified",
-      id: user._id,
+      // id: user._id, // exclude this if not needed
+      uuid: user.uuid,
       userName: user.userName,
       email: user.email,
       role: user.role,
+      originalRole: user.originalRole, // Include original role if available
       image: user.image,
-    });
+    }); // Send success response
   } catch (error) {
     console.error("❌ Error verifying user:", error);
     return res
@@ -160,8 +162,9 @@ export const verifyUserAuth = async (
   }
 };
 
-// Logout -----------------------------------------
-// here we use the error middleware to test the error handling - feel to apply this to other routes
+// Logout ===========================================
+
+// svdsdv here we use the error middleware to test the error handling - feel to apply this to other routes
 
 export const userLogout = async (
   req: Request,
@@ -190,7 +193,7 @@ export const userLogout = async (
       signed: true,
       path: "/",
       secure: NODE_ENV === "production", // Set secure flag in production
-      sameSite: NODE_ENV === "production" ? "none" : "lax", // Adjust sameSite attribute as needed: strict, lax, none
+      sameSite: NODE_ENV === "production" ? "none" : undefined, // Adjust sameSite attribute as needed: strict, lax, none
     }); // Clear the auth cookie
 
     console.log("✅ User logout successful:", user);
@@ -205,7 +208,7 @@ export const userLogout = async (
   }
 };
 
-// delete user --------------------------------------
+// delete user =======================================
 
 export const deleteUser = async (
   req: Request,
@@ -236,7 +239,7 @@ export const deleteUser = async (
       signed: true,
       path: "/",
       secure: NODE_ENV === "production", // Set secure flag in production
-      sameSite: NODE_ENV === "production" ? "none" : "lax", // Adjust sameSite attribute as needed: strict, lax, none
+      sameSite: NODE_ENV === "production" ? "none" : undefined, // Adjust sameSite attribute as needed: strict, lax, none
     }); // Clear the auth cookie
 
     console.log("✅ User deleted successfully:", user);
@@ -368,5 +371,69 @@ export const updatePassword = async (
   } catch (err) {
     console.error("❌ Error in resetting password:", err);
     res.status(500).send("Error in resetting password.");
+  }
+};
+
+// Update User Role (admin only) =====================
+
+export const updateUserRole = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("🔍 Incoming request to update user role:", req.body);
+
+  try {
+    // Check if the user is an admin
+    if (req.userRole !== "admin") {
+      console.log("❌ Access denied. User is not an admin:", req.userRole);
+      return res.status(403).json({ message: "Access denied. Admins only." });
+    }
+
+    const { newRole } = req.body;
+    const userId = req.userId; // Extract userId from the token
+    console.log("🔍 User ID:", userId, "New Role:", newRole);
+
+    // Check if the new role is valid
+    const validRoles = ["admin", "mentor", "mentee"];
+    if (!validRoles.includes(newRole)) {
+      console.log("❌ Invalid role:", newRole);
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    // Find the user by ID
+    const user = await userModel.findById(userId);
+    if (!user) {
+      console.log("❌ User not found:", userId);
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    console.log("🔍 Found user:", user);
+
+    // Preserve the original role if not already set
+    if (!user.originalRole) {
+      user.originalRole = user.role;
+      console.log("🔍 Preserving original role:", user.role);
+    }
+
+    // Update the role
+    user.role = newRole;
+    await user.save();
+
+    console.log("✅ User role updated successfully:", user);
+    return res.status(200).json({
+      message: "User role updated",
+      id: user._id,
+      userName: user.userName,
+      email: user.email,
+      role: user.role,
+      originalRole: user.originalRole,
+      image: user.image,
+    });
+  } catch (error) {
+    console.error("❌ Error updating user role:", error);
+    return res
+      .status(500)
+      .json({ message: "Server error", cause: error.message });
   }
 };

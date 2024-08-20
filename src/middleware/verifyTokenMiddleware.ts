@@ -36,7 +36,7 @@ export const verifyToken = async (
         req.userId = userId; // Attach userId to the request object for downstream use
         req.userRole = userRole; // Attach userRole to the request object for downstream use
 
-        console.log(`🔑 User verified -  extracted data from token: userId + userRole (/utils/tokenMiddleware.ts)`);
+        console.log(`🔑 User verified -  extracted data from token: ${userId} + ${userRole} (verifyTokenMiddleware)`);
 
         resolve(); // Resolve the promise
         res.locals.jwtData = decodedToken; // Attach the decoded token to the response object
