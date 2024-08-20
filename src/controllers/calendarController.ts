@@ -72,7 +72,7 @@ export const bookCalendarEvent = async (req, res) => {
     if (req.userRole !== "mentee") {
       return res
         .status(403)
-        .json({ message: "Only mentees can book time slots." });
+        .json({ message: "Only mentee's can book time slots." });
     } // Check if the user is a mentee
 
     const event = await Calendar.findById(req.params.id);
@@ -85,11 +85,15 @@ export const bookCalendarEvent = async (req, res) => {
       return res.status(404).json({ message: "Mentee not found" });
     } // Check if the mentee exists and provide the menteeUuid
 
-    event.status = "booked"; // Set the status to booked
+    const paymentDeadline = new Date();
+    paymentDeadline.setMinutes(paymentDeadline.getMinutes() + 15); // Set deadline to 15 minutes from now
+
+    event.status = "pending"; // Set the status to pending
     event.menteeId = req.userId; // Add menteeId
     event.menteeUuid = mentee.uuid; // Add menteeUuid
+    event.paymentDeadline = paymentDeadline; // Set the payment deadline
     const updatedEvent = await event.save(); // Save the updated event
-    console.log("✅ Calendar event booked:", updatedEvent);
+    console.log("✅ Calendar event booked (pending payment):", updatedEvent);
     res.status(200).json(updatedEvent);
   } catch (error) {
     console.error("❌ Error booking calendar event:", error);
@@ -97,27 +101,6 @@ export const bookCalendarEvent = async (req, res) => {
   }
 };
 
-// booking details =============================================================
 
-// ugiugiu exclude sensitive information !!!!
 
-export const getBookingDetails = async (req, res) => {
-  try {
-    console.log("🔎 Fetching booking details for ID:", req.params.id);
 
-    const booking = await Calendar.findById(req.params.id)
-      .populate("mentorId", "image userName role skills")
-      .populate("menteeId", "userName email");
-
-    if (!booking) {
-      console.log("❌ Booking not found for ID:", req.params.id);
-      return res.status(404).json({ message: "Booking not found" });
-    }
-
-    console.log("✅ Booking details found:", booking);
-    res.json(booking);
-  } catch (error) {
-    console.error("❌ Error fetching booking details:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
