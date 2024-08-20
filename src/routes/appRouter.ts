@@ -6,9 +6,10 @@ import { Router } from "express";
 import testRoutes from "./testRoutes.js";
 import userRoutes from "./userRoutes.js";
 import skillRoutes from "./skillRouter.js";
-import calendarRoutes from './calendarRouter.js';
-import sessionRoutes from './sessionRouter.js';
-import feedbackRoutes from './feedbackRouter.js';
+import calendarRoutes from "./calendarRouter.js";
+import sessionRoutes from "./sessionRouter.js";
+import feedbackRoutes from "./feedbackRouter.js";
+import bookingRoutes from "./bookingRouter.js";
 
 // Routes ==========================================
 
@@ -20,11 +21,13 @@ appRouter.use("/user", userRoutes);
 
 appRouter.use("/skill", skillRoutes);
 
-appRouter.use('/calendar', calendarRoutes);
+appRouter.use("/calendar", calendarRoutes);
 
-appRouter.use('/session', sessionRoutes);
+appRouter.use("/booking", bookingRoutes);
 
-appRouter.use('/feedback', feedbackRoutes);
+appRouter.use("/session", sessionRoutes);
+
+appRouter.use("/feedback", feedbackRoutes);
 
 // Exports =========================================
 
