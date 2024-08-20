@@ -9,8 +9,8 @@ import {
 
 const calendarRoutes = express.Router();
 
-// http://localhost:4000/app/calendar/:mentorId
-calendarRoutes.get("/:mentorId", verifyToken, getMentorAvailability);
+// http://localhost:4000/app/calendar/:mentorUuid
+calendarRoutes.get("/:mentorUuid", verifyToken, getMentorAvailability);
 
 // http://localhost:4000/app/calendar/
 calendarRoutes.post("/", verifyToken, addCalendarEvent);

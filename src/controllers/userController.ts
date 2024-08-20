@@ -1,19 +1,13 @@
-// Imports =========================================
+// userController.ts
 
 import bcrypt from "bcryptjs"; // Hashing passwords
-import { Request, Response, NextFunction } from "express"; // Import types (Typescript)
-
+import { v4 as uuidv4 } from "uuid"; // Generate unique IDs
 import crypto from "crypto";
 import nodemailer from "nodemailer";
-
-// Models ------------------------------------------
-
-import userModel from "../models/userModel.js";
+import { Request, Response, NextFunction } from "express"; // Import types (Typescript)
 import {
   NODE_ENV,
   COOKIE_NAME,
-  BASE_URL,
-  PORT,
   DOMAIN,
   BACKEND_URL,
   EMAIL_USER,
@@ -21,10 +15,11 @@ import {
 } from "../utils/config.js";
 import { setAuthCookie } from "../utils/authHelpers.js";
 import { errorHandlerMiddleware } from "../middleware/errorHandlerMiddleware.js";
+import userModel from "../models/userModel.js";
 
-// Controller functions ============================
+// Get users ========================================
 
-// Get users -------------------------------------
+// ugiugiu exclude sensitive information !!!!
 
 export const getUsers = async (
   req: Request,
@@ -41,7 +36,7 @@ export const getUsers = async (
   }
 };
 
-// Signup -----------------------------------------
+// Signup ===========================================
 
 export const userSignup = async (
   req: Request,
@@ -64,6 +59,7 @@ export const userSignup = async (
       password: hashedPassword,
       role,
       image: userProfileImage,
+      uuid: uuidv4(), 
     }); // Create a new user instance
 
     await user.save(); // Save user to database
@@ -73,7 +69,8 @@ export const userSignup = async (
     console.log("✅ User signup successful:", user);
     return res.status(201).json({
       message: "New User",
-      id: user._id,
+      // id: user._id, // exclude this if not needed
+      uuid: user.uuid, 
       userName: user.userName,
       email: user.email,
       role: user.role,
@@ -86,7 +83,7 @@ export const userSignup = async (
   }
 };
 
-// Login ------------------------------------------
+// Login ============================================
 
 export const userLogin = async (
   req: Request,
@@ -111,7 +108,8 @@ export const userLogin = async (
     console.log("✅ User login successful:", user);
     return res.status(200).json({
       message: "Welcome Back",
-      id: user._id,
+      // id: user._id, // exclude this if not needed
+      uuid: user.uuid, 
       userName: user.userName,
       email: user.email,
       role: user.role,
@@ -124,7 +122,7 @@ export const userLogin = async (
   }
 };
 
-// Verify user auth ------------------------------------
+// Verify user auth =================================
 
 export const verifyUserAuth = async (
   req: Request,
@@ -148,7 +146,8 @@ export const verifyUserAuth = async (
 
     return res.status(200).json({
       message: "User Verified",
-      id: user._id,
+      // id: user._id, // exclude this if not needed
+      uuid: user.uuid,
       userName: user.userName,
       email: user.email,
       role: user.role,
@@ -163,8 +162,9 @@ export const verifyUserAuth = async (
   }
 };
 
-// Logout -----------------------------------------
-// here we use the error middleware to test the error handling - feel to apply this to other routes
+// Logout ===========================================
+
+// svdsdv here we use the error middleware to test the error handling - feel to apply this to other routes
 
 export const userLogout = async (
   req: Request,
@@ -208,7 +208,7 @@ export const userLogout = async (
   }
 };
 
-// delete user --------------------------------------
+// delete user =======================================
 
 export const deleteUser = async (
   req: Request,
@@ -374,7 +374,7 @@ export const updatePassword = async (
   }
 };
 
-// Update User Role: user/update-role -------------------
+// Update User Role (admin only) =====================
 
 export const updateUserRole = async (
   req: Request,
