@@ -85,17 +85,23 @@ export const bookCalendarEvent = async (req, res) => {
       return res.status(404).json({ message: "Mentee not found" });
     } // Check if the mentee exists and provide the menteeUuid
 
-    event.status = "booked"; // Set the status to booked
+    const paymentDeadline = new Date();
+    paymentDeadline.setMinutes(paymentDeadline.getMinutes() + 15); // Set deadline to 15 minutes from now
+
+    event.status = "pending"; // Set the status to pending
     event.menteeId = req.userId; // Add menteeId
     event.menteeUuid = mentee.uuid; // Add menteeUuid
+    event.paymentDeadline = paymentDeadline; // Set the payment deadline
     const updatedEvent = await event.save(); // Save the updated event
-    console.log("✅ Calendar event booked:", updatedEvent);
+    console.log("✅ Calendar event booked (pending payment):", updatedEvent);
     res.status(200).json(updatedEvent);
   } catch (error) {
     console.error("❌ Error booking calendar event:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 // booking details =============================================================
 
