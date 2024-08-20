@@ -1,7 +1,3 @@
-// appRouter
-// main roue handler
-
-// Imports =========================================
 import { Router } from "express";
 import testRoutes from "./testRoutes.js";
 import userRoutes from "./userRoutes.js";
@@ -10,8 +6,6 @@ import calendarRoutes from "./calendarRouter.js";
 import sessionRoutes from "./sessionRouter.js";
 import feedbackRoutes from "./feedbackRouter.js";
 import bookingRoutes from "./bookingRouter.js";
-
-// Routes ==========================================
 
 const appRouter = Router();
 
@@ -28,7 +22,5 @@ appRouter.use("/booking", bookingRoutes);
 appRouter.use("/session", sessionRoutes);
 
 appRouter.use("/feedback", feedbackRoutes);
-
-// Exports =========================================
 
 export default appRouter;

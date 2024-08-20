@@ -6,6 +6,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ValidationChain, validationResult } from "express-validator";
 import userModel from "../models/userModel.js";
+import Feedback from "../models/feedbackModel.js";
 
 // Validate Function ===============================
 
@@ -39,3 +40,4 @@ export const validate = (validations: ValidationChain[]) => {
 //     return Promise.reject('Email already in use');
 //   }
 // });
+

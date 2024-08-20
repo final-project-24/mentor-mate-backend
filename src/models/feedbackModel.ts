@@ -6,7 +6,7 @@ const feedbackSchema = new mongoose.Schema({
   improvement: { type: String },
   publicFeedback: { type: Boolean, required: true },
   rating: { type: Number },
-  additionalComment: { type: String },
+  additionalComment: { type: String }, 
   isMentor: { type: Boolean, required: true },
 });
 
