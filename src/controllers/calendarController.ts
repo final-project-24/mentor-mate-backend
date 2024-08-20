@@ -99,25 +99,25 @@ export const bookCalendarEvent = async (req, res) => {
 
 // booking details =============================================================
 
+// ugiugiu exclude sensitive information !!!!
+
 export const getBookingDetails = async (req, res) => {
   try {
-    console.log("Fetching booking details for ID:", req.params.id);
+    console.log("🔎 Fetching booking details for ID:", req.params.id);
 
     const booking = await Calendar.findById(req.params.id)
-      // .populate("userId", "image userName role skills") // mentor: populate method to get access to user model
-      // .populate("bookedBy", "userName email"); // mentee: populate method to get access to user model
-      .populate("mentorId", "image userName role skills") // Changed from userId to mentorId
-      .populate("menteeId", "userName email"); // Changed from bookedBy to menteeId
+      .populate("mentorId", "image userName role skills")
+      .populate("menteeId", "userName email");
 
     if (!booking) {
-      console.log("Booking not found for ID:", req.params.id);
+      console.log("❌ Booking not found for ID:", req.params.id);
       return res.status(404).json({ message: "Booking not found" });
     }
 
-    console.log("Booking details found:", booking);
+    console.log("✅ Booking details found:", booking);
     res.json(booking);
   } catch (error) {
-    console.error("Error fetching booking details:", error);
+    console.error("❌ Error fetching booking details:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
