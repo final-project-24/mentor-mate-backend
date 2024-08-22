@@ -33,7 +33,7 @@ export const setAuthCookie = (
 ) => {
   res.clearCookie(COOKIE_NAME, {
     httpOnly: true,
-    domain: DOMAIN,
+    domain: NODE_ENV === 'production' ? DOMAIN : undefined,
     signed: true,
     path: "/",
     secure: NODE_ENV === "production", // Set secure flag in production
@@ -46,7 +46,7 @@ export const setAuthCookie = (
 
   res.cookie(COOKIE_NAME, token, {
     path: "/",
-    domain: DOMAIN,
+    domain: NODE_ENV === 'production' ? DOMAIN : undefined,
     expires,
     httpOnly: true,
     signed: true,
