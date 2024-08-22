@@ -3,7 +3,6 @@ import testRoutes from "./testRoutes.js";
 import userRoutes from "./userRoutes.js";
 import protoSkillRoutes from "./protoSkillRouter.js";
 import skillCategoryRoutes from "./skillCategoryRouter.js";
-import skillRoutes from "./skillRouter.js";
 import calendarRoutes from "./calendarRouter.js";
 import sessionRoutes from "./sessionRouter.js";
 import feedbackRoutes from "./feedbackRouter.js";
@@ -18,8 +17,6 @@ appRouter.use("/user", userRoutes);
 appRouter.use("/proto-skill", protoSkillRoutes)
 
 appRouter.use("/skill-category", skillCategoryRoutes)
-
-appRouter.use("/skill", skillRoutes)
 
 appRouter.use("/calendar", calendarRoutes);
 
