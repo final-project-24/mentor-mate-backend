@@ -1,6 +1,9 @@
 import { Router } from "express";
 import testRoutes from "./testRoutes.js";
 import userRoutes from "./userRoutes.js";
+import protoSkillRoutes from "./protoSkillRouter.js";
+import skillCategoryRoutes from "./skillCategoryRouter.js";
+import userSkillRoutes from "./userSkillRouter.js";
 import skillRoutes from "./skillRouter.js";
 import calendarRoutes from "./calendarRouter.js";
 import sessionRoutes from "./sessionRouter.js";
@@ -13,7 +16,14 @@ appRouter.use("/test", testRoutes);
 
 appRouter.use("/user", userRoutes);
 
-appRouter.use("/skill", skillRoutes);
+appRouter.use("/proto-skill", protoSkillRoutes)
+
+appRouter.use("/skill-category", skillCategoryRoutes)
+
+// ! the user-skill routes are disabled because the model and controller is not ready
+// appRouter.use("/user-skill", userSkillRoutes)
+
+appRouter.use("/skill", skillRoutes)
 
 appRouter.use("/calendar", calendarRoutes);
 
