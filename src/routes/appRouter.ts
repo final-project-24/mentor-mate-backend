@@ -1,7 +1,8 @@
 import { Router } from "express";
 import testRoutes from "./testRoutes.js";
 import userRoutes from "./userRoutes.js";
-import skillRoutes from "./skillRouter.js";
+import protoSkillRoutes from "./protoSkillRouter.js";
+import skillCategoryRoutes from "./skillCategoryRouter.js";
 import calendarRoutes from "./calendarRouter.js";
 import sessionRoutes from "./sessionRouter.js";
 import feedbackRoutes from "./feedbackRouter.js";
@@ -13,7 +14,9 @@ appRouter.use("/test", testRoutes);
 
 appRouter.use("/user", userRoutes);
 
-appRouter.use("/skill", skillRoutes);
+appRouter.use("/proto-skill", protoSkillRoutes)
+
+appRouter.use("/skill-category", skillCategoryRoutes)
 
 appRouter.use("/calendar", calendarRoutes);
 
