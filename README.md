@@ -1,3 +1,5 @@
+[![Logo](https://raw.githubusercontent.com/final-project-24/mentor-mate-frontend/61ed792c89f83d2013c4f83c5364a9e328c73315/src/assets/images/mentormateLogo.svg?token=BC4L5JVTWQ2YPSDIWCSJ3S3GYQ2TK)](https://www.miles-advani.com/)
+
 # Backend - Group 1
 
 ## Table of Contents

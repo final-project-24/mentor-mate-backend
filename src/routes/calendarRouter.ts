@@ -4,7 +4,6 @@ import {
   getMentorAvailability,
   addCalendarEvent,
   bookCalendarEvent,
-  getBookingDetails,
 } from "../controllers/calendarController.js";
 
 const calendarRoutes = express.Router();
@@ -17,8 +16,5 @@ calendarRoutes.post("/", verifyToken, addCalendarEvent);
 
 // http://localhost:4000/app/calendar/book/:id
 calendarRoutes.post("/book/:id", verifyToken, bookCalendarEvent);
-
-// http://localhost:4000/app/calendar/booking-details/:id
-calendarRoutes.get("/booking-details/:id", getBookingDetails);
 
 export default calendarRoutes;

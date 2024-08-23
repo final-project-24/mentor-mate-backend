@@ -4,6 +4,7 @@
 // Imports ==============================================
 // import dotenv from "dotenv";   // change the dev script in package,json to:
 // dotenv.config();               // "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\" ",
+import "./jobs/revertExpiredBookings.js"; // Import the cron job
 import app from "./app.js";
 import db from "./db.js";
 import { PORT } from "./utils/config.js";

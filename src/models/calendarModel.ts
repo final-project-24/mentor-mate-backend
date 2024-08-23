@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
 const calendarSchema = new mongoose.Schema({
-  // userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   mentorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -16,10 +15,14 @@ const calendarSchema = new mongoose.Schema({
   description: { type: String },
   start: { type: Date, required: true },
   end: { type: Date, required: true },
-  status: { type: String, enum: ["available", "booked"], default: "available" },
-  // bookedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  menteeId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Changed from bookedBy to menteeId
+  status: {
+    type: String,
+    enum: ["available", "booked", "pending"], // Add a new status "pending"
+    default: "available",
+  },
+  menteeId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   menteeUuid: { type: String, index: true }, // Add an index for performance
+  paymentDeadline: { type: Date }, // New field to track payment deadline
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
