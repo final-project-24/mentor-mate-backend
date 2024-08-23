@@ -4,7 +4,6 @@ import axios from 'axios';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Constants for payment statuses
 const PAYMENT_STATUS = {
   PENDING: 'pending',
   SUCCESS: 'success',
