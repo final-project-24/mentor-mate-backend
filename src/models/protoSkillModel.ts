@@ -83,7 +83,9 @@ protoSkillSchema.statics.validateSkillChanges = async function (data, id) {
 protoSkillSchema.pre<IProtoSkill>('save', function (next) {
   this.protoSkillTitle = capitalizeFirstChar(this.protoSkillTitle)
   this.protoSkillTitleLower = this.protoSkillTitle.toLowerCase()
-  this.protoSkillDescription = capitalizeFirstChar(this.protoSkillDescription)
+
+  if (this.protoSkillDescription)
+    this.protoSkillDescription = capitalizeFirstChar(this.protoSkillDescription)
 
   next()
 })
