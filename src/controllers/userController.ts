@@ -59,7 +59,7 @@ export const userSignup = async (
       password: hashedPassword,
       role,
       image: userProfileImage,
-      uuid: uuidv4(), 
+      uuid: uuidv4(),
     }); // Create a new user instance
 
     await user.save(); // Save user to database
@@ -70,7 +70,7 @@ export const userSignup = async (
     return res.status(201).json({
       message: "New User",
       // id: user._id, // exclude this if not needed
-      uuid: user.uuid, 
+      uuid: user.uuid,
       userName: user.userName,
       email: user.email,
       role: user.role,
@@ -109,7 +109,7 @@ export const userLogin = async (
     return res.status(200).json({
       message: "Welcome Back",
       // id: user._id, // exclude this if not needed
-      uuid: user.uuid, 
+      uuid: user.uuid,
       userName: user.userName,
       email: user.email,
       role: user.role,
@@ -435,5 +435,52 @@ export const updateUserRole = async (
     return res
       .status(500)
       .json({ message: "Server error", cause: error.message });
+  }
+};
+
+// change password ==================================
+
+export const changePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+  const userId = req.userId; // Assuming verifyToken middleware adds userId to req
+
+  if (!userId) {
+    return res.status(400).json({ msg: "User ID is required" });
+  }
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return res.status(400).json({ msg: "All fields are required" });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ msg: "New passwords do not match" });
+  }
+
+  try {
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ msg: "Current password is incorrect" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    console.log("✅ Password changed successfully for user:", user.email);
+    return res.status(200).json({ msg: "Password changed successfully" });
+  } catch (error) {
+    console.error("❌ Error changing password:", error);
+    return res.status(500).json({ msg: "Server error", cause: error.message });
   }
 };
