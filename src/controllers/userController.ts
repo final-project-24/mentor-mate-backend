@@ -438,6 +438,45 @@ export const updateUserRole = async (
   }
 };
 
+// Change UserName ==================================
+
+export const changeUserName = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.userId; // Extract userId from request object
+    const { newUserName } = req.body; // Extract newUserName from request body
+
+    if (!userId || !newUserName) {
+      return res
+        .status(400)
+        .json({ message: "User ID and new user name are required" });
+    }
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.userName = newUserName;
+    await user.save();
+
+    console.log("✅ User name change successful:", user);
+    return res.status(200).json({
+      message: "User name updated successfully",
+      userId: user._id,
+      newUserName: user.userName,
+    });
+  } catch (error) {
+    console.error("❌ Error changing user name:", error);
+    return res
+      .status(500)
+      .json({ message: "Server error", cause: error.message });
+  }
+};
+
 // change password ==================================
 
 export const changePassword = async (
@@ -482,5 +521,36 @@ export const changePassword = async (
   } catch (error) {
     console.error("❌ Error changing password:", error);
     return res.status(500).json({ msg: "Server error", cause: error.message });
+  }
+};
+
+// Change Email =====================================
+
+export const changeEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { newEmail } = req.body;
+    const userId = req.userId;
+
+    const existingUser = await userModel.findOne({ email: newEmail });
+    if (existingUser) return res.status(401).send("Email already in use");
+
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).send("User not found");
+
+    user.email = newEmail;
+    await user.save();
+
+    console.log("✅ Email change successful:", user);
+    return res.status(200).json({
+      message: "Email changed successfully",
+      email: user.email,
+    });
+  } catch (error) {
+    console.log("❌ Error changing email:", error);
+    return res.status(500).json({ message: "ERROR", cause: error.message });
   }
 };
