@@ -3,7 +3,7 @@ import { verifyToken } from "../middleware/verifyTokenMiddleware.js";
 import { validate } from "../middleware/validatorMiddleware.js";
 import { skillCategoryValidationChain } from "../middleware/validationChains/skillCategoryValidationChain.js";
 import { paginationParamsValidationChain } from "../middleware/validationChains/paginationParamsValidationChain.js";
-import checkIfAdmin from "../middleware/checkIfAdminMiddleware.js";
+import requireSpecificRole from "../middleware/requireSpecificRoleMiddleware.js";
 import { 
   createSkillCategory, 
   deleteSkillCategory, 
@@ -16,8 +16,8 @@ const skillCategoryRoutes = express.Router()
 // apply verifyToken to all routes
 skillCategoryRoutes.use(verifyToken)
 
-// apply checkIfAdmin to all routes
-skillCategoryRoutes.use(checkIfAdmin)
+// apply requireSpecificRole to all routes
+// skillCategoryRoutes.use(requireSpecificRole('admin'))
 
 // ... /app/skill-category/get-skill-categories/?queryParams
 skillCategoryRoutes.get(
@@ -28,14 +28,16 @@ skillCategoryRoutes.get(
 
 // ... /app/skill-category/create-skill-category
 skillCategoryRoutes.post(
-  '/create-skill-category', 
+  '/create-skill-category',
+  requireSpecificRole('admin'),
   validate(skillCategoryValidationChain),
   createSkillCategory
 )
 
 // ... /app/skill-category/edit-skill-category
 skillCategoryRoutes.patch(
-  '/edit-skill-category/:id', 
+  '/edit-skill-category/:id',
+  requireSpecificRole('admin'),
   validate(skillCategoryValidationChain),
   editSkillCategory
 )
@@ -43,6 +45,7 @@ skillCategoryRoutes.patch(
 // ... /app/skill-category/delete-skill-category
 skillCategoryRoutes.delete(
   '/delete-skill-category/:id',
+  requireSpecificRole('admin'),
   deleteSkillCategory
 )
 
