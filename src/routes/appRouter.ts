@@ -7,7 +7,7 @@ import sessionRoutes from './sessionRouter.js';
 import feedbackRoutes from './feedbackRouter.js';
 import protoSkillRoutes from "./protoSkillRouter.js";
 import skillCategoryRoutes from "./skillCategoryRouter.js";
-import bookingRoutes from "./bookingRouter.js";
+// import bookingRoutes from "./bookingRouter.js";
 
 
 const appRouter = Router();
