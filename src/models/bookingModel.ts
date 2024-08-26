@@ -20,6 +20,7 @@ const bookingSchema = new mongoose.Schema({
   }, // Link to Calendar event
   start: { type: Date, required: true },
   end: { type: Date, required: true },
+  price: { type: Number, required: true, default: 45.00 }, // Add price field
   isAgreed: { type: Boolean, default: false },
   isPaid: { type: Boolean, default: false }, // Field to track payment status
   createdAt: { type: Date, default: Date.now },
