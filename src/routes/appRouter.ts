@@ -20,7 +20,7 @@ appRouter.use('/session', sessionRoutes);
 appRouter.use('/feedback', feedbackRoutes);
 appRouter.use("/proto-skill", protoSkillRoutes)
 appRouter.use("/skill-category", skillCategoryRoutes)
-appRouter.use("/booking", bookingRoutes);
+// appRouter.use("/booking", bookingRoutes);
 
 
 export default appRouter;
