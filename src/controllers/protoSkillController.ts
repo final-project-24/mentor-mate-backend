@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import protoSkillModel from "../models/protoSkillModel.js"
+import userSkillModel from "../models/userSkillModel.js"
 
 export const getProtoSkills = async (req: Request, res: Response) => {
   // pagination params
@@ -10,7 +11,7 @@ export const getProtoSkills = async (req: Request, res: Response) => {
   try {
     // protoSkill search based on pagination params
     const skills = await protoSkillModel
-      .find()
+      .find({isActive: true}) // find only active skills
       .skip(skip)
       .limit(limit)
       .populate('skillCategoryId', 'skillCategoryTitle')
@@ -54,8 +55,14 @@ export const createProtoSkill = async (req: Request, res: Response) => {
       protoSkillDescription,
       skillCategoryId
     })
-  
-    res.status(201).json({skill})
+
+    if (skill) {
+      const populatedSkill = await protoSkillModel
+        .findById(skill._id)
+        .populate('skillCategoryId', 'skillCategoryTitle')
+
+      res.status(201).json({populatedSkill})
+    }
   } catch (error) {
     res.status(500).json({error: error.message})
   }
@@ -75,9 +82,15 @@ export const editProtoSkill = async (req: Request, res: Response) => {
       {new: true}
     )
 
-    updatedSkill
-      ? res.status(200).json({updatedSkill})
-      : res.status(404).json({msg: 'Skill not found'})
+    if (updatedSkill) {
+      const populatedSkill = await protoSkillModel
+        .findById(id)
+        .populate('skillCategoryId', 'skillCategoryTitle')
+
+      res.status(200).json({populatedSkill})
+    } else {
+      res.status(404).json({msg: 'Skill not found'})
+    }
   } catch (error) {
     res.status(500).json({error: error.message})
   }
@@ -89,9 +102,27 @@ export const deleteProtoSkill = async (req: Request, res: Response) => {
   try {
     await protoSkillModel.verifySkillCategoryId(id)
 
-    const deleteSkill = await protoSkillModel.findByIdAndDelete(id)
+    // ! hard delete
+    // const deleteSkill = await protoSkillModel.findByIdAndDelete(id)
 
-    return deleteSkill
+    // return deleteSkill
+    //   ? res.status(200).json({msg: 'Skill deleted successfully'})
+    //   : res.status(404).json({msg: 'Skill not found'})
+
+    // ! soft delete
+    const userSkillCount = await userSkillModel.countDocuments({protoSkillId: id})
+
+    if (userSkillCount > 0) {
+      return res.status(400).json({error: 'Cannot delete this skill as it is already in use by one or more mentors'})
+    }
+
+    // deactivate the skill category instead of deleting it
+    const deactivateSkill = await protoSkillModel.findByIdAndUpdate(
+      id,
+      {isActive: false}
+    )
+
+    return deactivateSkill
       ? res.status(200).json({msg: 'Skill deleted successfully'})
       : res.status(404).json({msg: 'Skill not found'})
   } catch (error) {

@@ -11,7 +11,7 @@ export const getSkillCategories = async (req: Request, res: Response) => {
   try {
     // skillCategory search based on pagination params
     const categories = await skillCategoryModel
-      .find()
+      .find({isActive: true}) // find only active categories
       .skip(skip)
       .limit(limit)
       .sort({createdAt: -1}) // TODO: introduce sort param instead of defaulting the sort
@@ -89,9 +89,28 @@ export const deleteSkillCategory = async (req: Request, res: Response) => {
     // static method
     await protoSkillModel.verifySkillCategoryId(id)
 
-    const deleteCategory = await skillCategoryModel.findByIdAndDelete(id)
+    // ! hard delete
+    // const deleteCategory = await skillCategoryModel.findByIdAndDelete(id)
 
-    return deleteCategory
+    // return deleteCategory
+    //   ? res.status(200).json({msg: 'Category deleted successfully'})
+    //   : res.status(404).json({msg: 'Category not found'})
+
+    // ! soft delete
+    // count the proto skills that use the category to be deleted
+    const skillCount = await protoSkillModel.countDocuments({skillCategoryId: id})
+
+    if (skillCount > 0) {
+      return res.status(400).json({error: 'Cannot delete this skill category as it is already in use by one or more skills'})
+    }
+
+    // deactivate the skill category instead of deleting it
+    const deactivateCategory = await skillCategoryModel.findByIdAndUpdate(
+      id,
+      {isActive: false}
+    )
+
+    return deactivateCategory
       ? res.status(200).json({msg: 'Category deleted successfully'})
       : res.status(404).json({msg: 'Category not found'})
   } catch (error) {

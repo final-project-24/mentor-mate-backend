@@ -6,6 +6,7 @@ import paymentRoutes from './paymentRouter.js';
 import sessionRoutes from './sessionRouter.js';
 import feedbackRoutes from './feedbackRouter.js';
 import protoSkillRoutes from "./protoSkillRouter.js";
+import userSkillRoutes from "./userSkillRouter.js";
 import skillCategoryRoutes from "./skillCategoryRouter.js";
 // import bookingRoutes from "./bookingRouter.js";
 

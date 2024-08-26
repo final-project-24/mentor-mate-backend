@@ -36,13 +36,13 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "mentor", "mentee"],
     },
     originalRole: { type: String }, // New field to store the original role
-    skills: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Skill",
-        default: [],
-      },
-    ],
+    // skills: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Skill",
+    //     default: [],
+    //   },
+    // ],
     // Add these fields for password reset functionality
     resetPasswordToken: {
       type: String,
