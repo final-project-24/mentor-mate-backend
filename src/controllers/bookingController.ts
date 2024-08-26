@@ -3,7 +3,7 @@ import User from "../models/userModel.js";
 
 // booking details =============================================================
 
-// ugiugiu exclude sensitive information !!!!
+
 
 export const getBookingDetails = async (req, res) => {
     try {
