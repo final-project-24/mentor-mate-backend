@@ -23,6 +23,7 @@ const calendarSchema = new mongoose.Schema({
   menteeId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   menteeUuid: { type: String, index: true }, // Add an index for performance
   paymentDeadline: { type: Date }, // New field to track payment deadline
+  price: { type: Number, required: true, default: 45.00 }, // Add price field
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
