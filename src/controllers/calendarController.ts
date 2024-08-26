@@ -56,6 +56,7 @@ export const addCalendarEvent = async (req, res) => {
       mentorId: req.userId, // add the mentorId
       mentorUuid: mentor.uuid, // Add mentorUuid
       status: "available", // Set the status to available
+      price: 45.00, // Add the price for the session
     }); // Create a new calendar event
     const savedEvent = await newEvent.save(); // Save the new calendar event
     console.log("✅ New calendar event saved:", savedEvent);
