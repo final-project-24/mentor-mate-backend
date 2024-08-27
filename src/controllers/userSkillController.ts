@@ -54,7 +54,7 @@ export const getUserSkills = async (req: Request, res: Response) => {
 }
 
 export const createUserSkill = async (req: Request, res: Response) => {
-  const {userId, userRole} = req
+  const {userId} = req
   const {
     protoSkillId,
     proficiency,
@@ -68,6 +68,9 @@ export const createUserSkill = async (req: Request, res: Response) => {
     // get mentor uuid
     const {uuid: mentorUuid} = await userModel.findById(userId).select('uuid')
 
+    if (!mentorUuid)
+      throw new Error('Mentor not found')
+    
     const skill = await userSkillModel.create({
       mentorId: userId,
       mentorUuid,
@@ -94,10 +97,12 @@ export const createUserSkill = async (req: Request, res: Response) => {
         })
 
       res.status(201).json({populatedSkill})
+    } else {
+      res.status(404).json({msg: 'Skill not found'})
     }
   } catch (error) {
     if (error.code === 11000) {
-      return res.status(400).json({error: 'A skill with this proficiency already exists!'})
+      return res.status(400).json({error: 'A skill with this proficiency already exists'})
     }
 
     res.status(500).json({error: error.message})
@@ -142,7 +147,7 @@ export const editUserSkill = async (req: Request, res: Response) => {
     }
   } catch (error) {
     if (error.code === 11000) {
-      return res.status(400).json({error: 'A skill with this proficiency already exists!'})
+      return res.status(400).json({error: 'A skill with this proficiency already exists'})
     }
 
     res.status(500).json({error: error.message})
