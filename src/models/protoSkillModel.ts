@@ -45,8 +45,10 @@ const protoSkillSchema = new Schema<IProtoSkill>({
 })
 
 // ! static method to verify ID
-protoSkillSchema.statics.verifySkillCategoryId = function (...ids) {
-  if (!checkIfMongoId(...ids))
+protoSkillSchema.statics.verifySkillCategoryId = async function (id) {
+  const category = await this.findById(id)
+
+  if (!checkIfMongoId(id) || !category)
     throw new Error('Provided Category ID is not valid')
 }
 
