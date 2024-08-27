@@ -4,7 +4,7 @@ const enumValues = ['beginner', 'intermediate', 'advanced']
 
 export const userSkillValidationChain = [
   check('protoSkillId')
-    .if((val, {req}) => {
+    .if((req) => {
       return req.method.toLowerCase() !== 'patch'
     })
     .notEmpty()
