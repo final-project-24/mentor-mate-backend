@@ -19,8 +19,10 @@ import {
   validateResetToken,
   updatePassword,
   updateUserRole,
+  changeUserName,
+  changePassword,
+  changeEmail,
 } from "../controllers/userController.js";
-
 
 // Routes =================================================
 
@@ -45,7 +47,8 @@ userRoutes.get("/logout", verifyToken, userLogout);
 // userRoutes.post("/update/:id", verifyToken, updateUser);
 
 // http://localhost:4000/app/user/:id
-userRoutes.delete("/:id", verifyToken, deleteUser);
+// userRoutes.delete("/:id", verifyToken, deleteUser);
+userRoutes.delete("/", verifyToken, deleteUser);
 
 // http://localhost:4000/app/user/forgot-password
 userRoutes.post("/forgot-password", initiatePasswordReset);
@@ -58,6 +61,15 @@ userRoutes.post("/reset-password/:token", updatePassword);
 
 // http://localhost:4000/app/user/update-role
 userRoutes.put("/update-role", verifyToken, updateUserRole);
+
+// http://localhost:4000/app/user/change-username
+userRoutes.post("/change-username", verifyToken, changeUserName);
+
+// http://localhost:4000/app/user/change-password
+userRoutes.put("/change-password", verifyToken, changePassword);
+
+// http://localhost:4000/app/user/change-email
+userRoutes.put("/change-email", verifyToken, changeEmail);
 
 // Exports ==============================================
 
