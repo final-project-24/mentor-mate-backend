@@ -1,6 +1,6 @@
-import Payment from '../models/paymentModel.js';
 import Stripe from 'stripe';
 import axios from 'axios';
+import Payment from '../models/paymentModel.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -10,12 +10,12 @@ const PAYMENT_STATUS = {
   FAILED: 'failed',
 };
 
-// Stripe Payment Intent Handler
-export const createPaymentIntentHandler = async (req, res) => {
-  const { amount, currency = 'usd', userId, isMentee } = req.body;
+// Create Stripe Payment Intent Handler
+export const createStripePaymentIntentHandler = async (req, res) => {
+  const { amount, currency = 'usd', userId, isMentee, bookingId, eventId } = req.body;
 
-  if (!amount || !currency || !userId || typeof isMentee !== 'boolean') {
-    return res.status(400).send('Amount, currency, userId, and isMentee are required.');
+  if (!amount || !currency || !userId || typeof isMentee !== 'boolean' || !eventId) {
+    return res.status(400).send('Amount, currency, userId, isMentee, and bookingId are required.');
   }
 
   try {
@@ -34,24 +34,25 @@ export const createPaymentIntentHandler = async (req, res) => {
       paymentIntentId: paymentIntent.id,
       status: PAYMENT_STATUS.PENDING,
       userId,
+      eventId,
+      bookingId,
       isMentee,
     });
 
     await payment.save();
-
     res.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    console.error('Error creating payment intent:', error);
+    console.error('Error creating Stripe payment intent:', error.message);
     res.status(500).send('Server error. Please try again later.');
   }
 };
 
-// PayPal Payment Handler
+// Create PayPal Payment Handler
 export const createPayPalPaymentHandler = async (req, res) => {
-  const { amount, currency = 'usd', userId, isMentee, paypalPaymentId } = req.body;
+  const { amount, currency = 'usd', userId, isMentee, paypalPaymentId, bookingId, eventId } = req.body;
 
-  if (!amount || !currency || !userId || typeof isMentee !== 'boolean' || !paypalPaymentId) {
-    return res.status(400).send('Amount, currency, userId, isMentee, and paypalPaymentId are required.');
+  if (!amount || !currency || !userId || typeof isMentee !== 'boolean' || !paypalPaymentId || !bookingId) {
+    return res.status(400).send('Amount, currency, userId, isMentee, paypalPaymentId, and bookingId are required.');
   }
 
   try {
@@ -59,10 +60,9 @@ export const createPayPalPaymentHandler = async (req, res) => {
       return res.status(400).send('User must be a mentee to make a payment.');
     }
 
-    // Validate the payment with PayPal
     const response = await axios.get(`https://api.paypal.com/v1/payments/payment/${paypalPaymentId}`, {
       headers: {
-        Authorization: `Bearer ${process.env.PAYPAL_ACCESS_TOKEN}`, // Use a valid access token
+        Authorization: `Bearer ${process.env.PAYPAL_ACCESS_TOKEN}`,
       },
     });
 
@@ -73,43 +73,19 @@ export const createPayPalPaymentHandler = async (req, res) => {
     const payment = new Payment({
       amount,
       currency,
-      paymentIntentId: paypalPaymentId, // Store PayPal payment ID
+      paymentIntentId: paypalPaymentId,
       status: PAYMENT_STATUS.PENDING,
       userId,
+      eventId,
+      bookingId,
       isMentee,
     });
 
     await payment.save();
-
     res.json({ success: true });
   } catch (error) {
-    console.error('Error processing PayPal payment:', error);
+    console.error('Error processing PayPal payment:', error.message);
     res.status(500).send('Server error. Please try again later.');
   }
 };
 
-// Payment Status Update Handler
-export const paymentStatusUpdateHandler = async (req, res) => {
-  const { paymentIntentId, status } = req.body;
-
-  if (!paymentIntentId || !status || !Object.values(PAYMENT_STATUS).includes(status)) {
-    return res.status(400).send('Valid paymentIntentId and status are required.');
-  }
-
-  try {
-    const updatedPayment = await Payment.findOneAndUpdate(
-      { paymentIntentId },
-      { status },
-      { new: true }
-    );
-
-    if (!updatedPayment) {
-      return res.status(404).send('Payment not found.');
-    }
-
-    res.json(updatedPayment);
-  } catch (error) {
-    console.error('Error updating payment status:', error);
-    res.status(500).send('Server error. Please try again later.');
-  }
-};
