@@ -5,6 +5,7 @@ interface ISkillCategory extends Document {
   skillCategoryTitle: string
   skillCategoryTitleLower: string
   skillCategoryDescription: string
+  isActive: boolean
 }
 
 interface ISkillCategoryModel extends Model<ISkillCategory> {
@@ -26,6 +27,10 @@ const skillCategorySchema = new Schema<ISkillCategory>({
   },
   skillCategoryDescription: {
     type: String
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true
@@ -36,7 +41,7 @@ skillCategorySchema.statics.skillCategoryAlreadyExistsByTitle = async function (
   const categoryExists = await this.findOne({skillCategoryTitleLower: categoryTitle})
 
   if (categoryExists)
-    throw new Error('Category with this title already exists!')
+    throw new Error('Category with this title already exists')
 }
 
 // ! static method to validate category edit
@@ -51,13 +56,13 @@ skillCategorySchema.statics.validateCategoryChanges = async function (data, id) 
   const categoryExistsByTitle = await this.findOne({skillCategoryTitleLower: data.skillCategoryTitle.toLowerCase()})
 
   if (categoryExistsByTitle)
-    throw new Error('Category with this title already exists!')
+    throw new Error('Category with this title already exists')
 
-  // check if updated category differs from original skill
+  // check if updated category differs from original category
   const isDifferent = Object.keys(data).some(key => existingCategory[key] !== data[key])
 
   if (!isDifferent)
-    throw new Error('No category changes were detected!')
+    throw new Error('No category changes were detected')
 }
 
 // ! pre hook
@@ -76,6 +81,7 @@ skillCategorySchema.pre<ISkillCategory>('save', function (next) {
 skillCategorySchema.set('toJSON', {
   transform: function (_, ret) {
     delete ret.skillCategoryTitleLower
+    delete ret.isActive
     return ret
   }
 })

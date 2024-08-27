@@ -5,9 +5,9 @@ import checkIfMongoId from "../utils/checkIfMongoId.js";
 interface IProtoSkill extends Document {
   protoSkillTitle: string
   protoSkillTitleLower: string
-  // protoSkillProficiency: string
   protoSkillDescription: string
   skillCategoryId: Schema.Types.ObjectId
+  isActive: boolean
 }
 
 interface IProtoSkillModel extends Model<IProtoSkill> {
@@ -28,10 +28,6 @@ const protoSkillSchema = new Schema<IProtoSkill>({
     unique: true,
     // select: false
   },
-  // protoSkillProficiency: {
-  //   type: String,
-  //   enum: ['beginner', 'intermediate', 'advanced']
-  // },
   protoSkillDescription: {
     type: String,
   },
@@ -39,15 +35,19 @@ const protoSkillSchema = new Schema<IProtoSkill>({
     type: Schema.Types.ObjectId,
     ref: 'skill_category',
     required: true,
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true
 })
 
 // ! static method to verify ID
-protoSkillSchema.statics.verifySkillCategoryId = async function (...ids) {
+protoSkillSchema.statics.verifySkillCategoryId = function (...ids) {
   if (!checkIfMongoId(...ids))
-    throw new Error('Provided Category ID is not valid!')
+    throw new Error('Provided Category ID is not valid')
 }
 
 // ! static method to check for skill title conflict
@@ -55,7 +55,7 @@ protoSkillSchema.statics.skillAlreadyExistsByTitle = async function (skillTitle)
   const skillExists = await this.findOne({protoSkillTitleLower: skillTitle.toLowerCase()})
 
   if (skillExists) 
-    throw new Error('Skill with this title already exists!')
+    throw new Error('Skill with this title already exists')
 }
 
 // !static method to validate skill edit
@@ -64,19 +64,19 @@ protoSkillSchema.statics.validateSkillChanges = async function (data, id) {
   const existingSkill = await this.findById(id)
 
   if (!existingSkill)
-    throw new Error('Provided skill ID does not match any skill!')
+    throw new Error('Provided skill ID does not match any skill')
 
   // check for other skills with the same title
   const skillExistsByTitle = await this.findOne({protoSkillTitleLower: data.protoSkillTitle.toLowerCase()})
 
   if (skillExistsByTitle)
-    throw new Error('Skill with this title already exists!')
+    throw new Error('Skill with this title already exists')
 
   // check if updated skill differs from original skill
   const isDifferent = Object.keys(data).some(key => existingSkill[key] !== data[key])
 
   if (!isDifferent)
-    throw new Error('No skill changes were detected!')
+    throw new Error('No skill changes were detected')
 }
 
 // ! pre hook
@@ -95,6 +95,7 @@ protoSkillSchema.pre<IProtoSkill>('save', function (next) {
 protoSkillSchema.set('toJSON', {
   transform: function (_, ret) {
     delete ret.protoSkillTitleLower
+    delete ret.isActive
     return ret
   }
 })

@@ -3,7 +3,7 @@ import { verifyToken } from '../middleware/verifyTokenMiddleware.js'
 import { validate } from '../middleware/validatorMiddleware.js'
 import { protoSkillValidationChain } from '../middleware/validationChains/protoSkillValidationChain.js'
 import { paginationParamsValidationChain } from '../middleware/validationChains/paginationParamsValidationChain.js'
-import checkIfAdmin from '../middleware/checkIfAdminMiddleware.js'
+import requireSpecificRole from '../middleware/requireSpecificRoleMiddleware.js'
 import { 
   createProtoSkill, 
   deleteProtoSkill, 
@@ -17,7 +17,7 @@ const protoSkillRoutes = express.Router()
 protoSkillRoutes.use(verifyToken)
 
 // apply checkIfAdmin to all routes
-protoSkillRoutes.use(checkIfAdmin)
+// protoSkillRoutes.use(requireSpecificRole('admin'))
 
 // ... /app/proto-skill/get-proto-skills/?queryParams
 protoSkillRoutes.get(
@@ -29,6 +29,7 @@ protoSkillRoutes.get(
 // ... /app/proto-skill/create-proto-skill
 protoSkillRoutes.post(
   '/create-proto-skill',
+  requireSpecificRole('admin'),
   validate(protoSkillValidationChain),
   createProtoSkill
 )
@@ -36,11 +37,16 @@ protoSkillRoutes.post(
 // ... /app/proto-skill/edit-proto-skill/:id
 protoSkillRoutes.patch(
   '/edit-proto-skill/:id',
+  requireSpecificRole('admin'),
   validate(protoSkillValidationChain),
   editProtoSkill
 )
 
 // ... /app/proto-skill/delete-proto-skill/:id
-protoSkillRoutes.delete('/delete-proto-skill/:id', deleteProtoSkill)
+protoSkillRoutes.delete(
+  '/delete-proto-skill/:id', 
+  requireSpecificRole('admin'),
+  deleteProtoSkill
+)
 
 export default protoSkillRoutes
