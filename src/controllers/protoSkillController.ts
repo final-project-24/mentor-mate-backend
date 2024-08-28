@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import protoSkillModel from "../models/protoSkillModel.js"
 import userSkillModel from "../models/userSkillModel.js"
+import skillCategoryModel from "../models/skillCategoryModel.js"
 
 export const getProtoSkills = async (req: Request, res: Response) => {
   // pagination params
@@ -50,6 +51,11 @@ export const createProtoSkill = async (req: Request, res: Response) => {
     await protoSkillModel.verifySkillCategoryId(skillCategoryId)
     await protoSkillModel.skillAlreadyExistsByTitle(protoSkillTitle)
 
+    const category = await skillCategoryModel.findById(skillCategoryId)
+
+    if (!category)
+      throw new Error('Provided skill category ID does not match any skills')
+
     const skill = await protoSkillModel.create({
       protoSkillTitle,
       protoSkillDescription,
@@ -62,6 +68,8 @@ export const createProtoSkill = async (req: Request, res: Response) => {
         .populate('skillCategoryId', 'skillCategoryTitle')
 
       res.status(201).json({populatedSkill})
+    } else {
+      res.status(404).json({error: 'Skill not found'})
     }
   } catch (error) {
     res.status(500).json({error: error.message})
