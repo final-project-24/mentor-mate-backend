@@ -87,10 +87,11 @@ userSkillSchema.statics.validateSkillChanges = async function (data, id) {
 }
 
 // ! set hook
-// excludes mentorId prop from response object when using .json() method
+// excludes model props from response object when using .json() method
 userSkillSchema.set('toJSON', {
   transform: function (_, ret) {
     delete ret.mentorId
+    delete ret.isActive
     return ret
   }
 })
