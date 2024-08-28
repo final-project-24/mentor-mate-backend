@@ -8,7 +8,8 @@ import {
   getUserSkills,
   createUserSkill,
   editUserSkill,
-  // deleteUserSkill
+  deleteUserSkill,
+  getMentorSkills
 } from "../controllers/userSkillController.js";
 
 const userSkillRoutes = express.Router()
@@ -19,12 +20,21 @@ userSkillRoutes.use(verifyToken)
 // apply requireSpecificRole to all routes
 // userSkillRoutes.use(requireSpecificRole('mentor'))
 
+// ... /app/user-skill/get-user-skills?queryParams
 userSkillRoutes.get(
   '/get-user-skills', 
   validate(paginationParamsValidationChain),
   getUserSkills
 )
 
+// ... /app/user-skill/get-mentor-skills?queryParams
+userSkillRoutes.get(
+  '/get-mentor-skills',
+  validate(paginationParamsValidationChain),
+  getMentorSkills
+)
+
+// ... /app/user-skill/create-user-skill
 userSkillRoutes.post(
   '/create-user-skill',
   requireSpecificRole('mentor'),
@@ -32,6 +42,7 @@ userSkillRoutes.post(
   createUserSkill
 )
 
+// ... /app/user-skill/edit-user-skill/:id
 userSkillRoutes.patch(
   '/edit-user-skill/:id',
   requireSpecificRole('mentor'),
@@ -39,10 +50,11 @@ userSkillRoutes.patch(
   editUserSkill
 )
 
-// userSkillRoutes.delete(
-//   '/delete-user-skill/:id',
-//   requireSpecificRole('mentor'),
-//   deleteUserSkill
-// )
+// ... /app/user-skill/delete-user-skill/:id
+userSkillRoutes.delete(
+  '/delete-user-skill/:id',
+  requireSpecificRole('mentor'),
+  deleteUserSkill
+)
 
 export default userSkillRoutes
