@@ -19,7 +19,7 @@ skillCategoryRoutes.use(verifyToken)
 // apply requireSpecificRole to all routes
 // skillCategoryRoutes.use(requireSpecificRole('admin'))
 
-// ... /app/skill-category/get-skill-categories/?queryParams
+// ... /app/skill-category/get-skill-categories?queryParams
 skillCategoryRoutes.get(
   '/get-skill-categories', 
   validate(paginationParamsValidationChain),
@@ -34,7 +34,7 @@ skillCategoryRoutes.post(
   createSkillCategory
 )
 
-// ... /app/skill-category/edit-skill-category
+// ... /app/skill-category/edit-skill-category/:id
 skillCategoryRoutes.patch(
   '/edit-skill-category/:id',
   requireSpecificRole('admin'),
@@ -42,7 +42,7 @@ skillCategoryRoutes.patch(
   editSkillCategory
 )
 
-// ... /app/skill-category/delete-skill-category
+// ... /app/skill-category/delete-skill-category/:id
 skillCategoryRoutes.delete(
   '/delete-skill-category/:id',
   requireSpecificRole('admin'),

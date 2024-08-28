@@ -49,6 +49,17 @@ const userSkillSchema = new Schema<IUserSkill>({
   timestamps: true
 })
 
+// ! index method (has to be placed right after schema definition)
+// restrict index on database level to allow only one proficiency enum value per prototypeSkill and mentor
+userSkillSchema.index(
+  {
+    mentorId: 1,
+    protoSkillId: 1,
+    proficiency: 1
+  },
+  { unique: true }
+)
+
 // ! static method to verify user skill IDs
 userSkillSchema.statics.verifyUserSkillId = function (...ids) {
   if (!checkIfMongoId(...ids)) {
@@ -59,12 +70,6 @@ userSkillSchema.statics.verifyUserSkillId = function (...ids) {
     }
   }
 }
-
-// ! static method to restrict access for specific user groups
-// userSkillSchema.statics.restrictUserGroupsAccess = function (userRole) {
-//   if (userRole === ('admin' || 'mentee'))
-//     throw new Error('Access denied, you do not have permission to access this resource!')
-// }
 
 // ! static method to validate user skill edit
 userSkillSchema.statics.validateSkillChanges = async function (data, id) {
@@ -82,23 +87,14 @@ userSkillSchema.statics.validateSkillChanges = async function (data, id) {
 }
 
 // ! set hook
-// excludes mentorId prop from response object when using .json() method
+// excludes model props from response object when using .json() method
 userSkillSchema.set('toJSON', {
   transform: function (_, ret) {
     delete ret.mentorId
+    delete ret.isActive
     return ret
   }
 })
-
-// ! create unique db level index on mentor ID and proficiency
-// this only allows one instance of specific proficiency skill per mentor
-userSkillSchema.index(
-  {
-    mentorId: 1,
-    proficiency: 1
-  },
-  {unique: true}
-)
 
 const userSkillModel = model<IUserSkill, IUserSkillModel>('user_skill', userSkillSchema)
 

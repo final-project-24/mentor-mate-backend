@@ -45,8 +45,8 @@ const protoSkillSchema = new Schema<IProtoSkill>({
 })
 
 // ! static method to verify ID
-protoSkillSchema.statics.verifySkillCategoryId = function (...ids) {
-  if (!checkIfMongoId(...ids))
+protoSkillSchema.statics.verifySkillCategoryId = function (id) {
+  if (!checkIfMongoId(id))
     throw new Error('Provided Category ID is not valid')
 }
 
@@ -91,7 +91,7 @@ protoSkillSchema.pre<IProtoSkill>('save', function (next) {
 })
 
 // ! set hook
-// excludes protoSkillTitleLower prop from response object when using .json() method
+// excludes model props from response object when using .json() method
 protoSkillSchema.set('toJSON', {
   transform: function (_, ret) {
     delete ret.protoSkillTitleLower
