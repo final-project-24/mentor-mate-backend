@@ -23,7 +23,7 @@ export const validate = (validations: ValidationChain[]) => {
     // If the errors object is not empty, it means validation errors were found.
     if (!errors.isEmpty()) {
       console.log("❌ Validation failed with errors:", errors.array()); // Logs the validation errors.
-      return res.status(422).json({ errors: errors.array() }); // Responds with a 422 Unprocessable Entity status code and the errors.
+      return res.status(422).json({ error: errors.array() }); // Responds with a 422 Unprocessable Entity status code and the errors.
     }
     console.log("✅ Validation successful"); // If no errors were found, logs that validation was successful.
     next(); // Calls the next middleware in the stack.
