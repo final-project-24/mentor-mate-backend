@@ -38,7 +38,7 @@ async function seedMentors() {
 
   try {
     await userModel.insertMany(mentors)
-    console.log('✅ Skill categories seeded')
+    console.log('✅ Mentors seeded')
   } catch (err) {
     console.error('❌ Error seeding mentors:', err)
   }
@@ -218,13 +218,11 @@ async function seedSkillsData() {
 const insertTestData = async () => {
   try {
     await db.connect()
-    console.log("✅ Connected to database...")
     await seedSkillsData()
   } catch (error) {
     console.error("❌ Error seeding skill data:", error)
   } finally {
     await db.close()
-    console.log("✅ Database connection closed.")
   }
 }
 
