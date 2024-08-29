@@ -5,6 +5,7 @@ import {
   //   paymentStatusUpdateHandler,
   createStripePaymentIntentHandler,
   createPayPalPaymentHandler,
+  paymentStatusUpdateHandler,
 } from "../controllers/paymentController.js";
 
 const paymentRoutes = express.Router();
@@ -21,5 +22,8 @@ paymentRoutes.post(
 
 // Route for creating a PayPal Payment
 paymentRoutes.post("/paypal/create-payment", createPayPalPaymentHandler);
+
+// Route for updating payment status
+paymentRoutes.post("/update-payment-status", paymentStatusUpdateHandler);
 
 export default paymentRoutes;
