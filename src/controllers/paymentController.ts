@@ -309,3 +309,63 @@ export const createPayPalPaymentHandler = async (req, res) => {
     res.status(500).send("Server error. Please try again later.");
   }
 };
+
+// Payment Status Update Handler ================================================
+
+export const paymentStatusUpdateHandler = async (req, res) => {
+  const { paymentIntentId } = req.body;
+
+  if (!paymentIntentId) {
+    return res.status(400).send("PaymentIntentId is required.");
+  }
+
+  try {
+    // Retrieve the payment intent from Stripe
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    if (!paymentIntent) {
+      return res.status(404).send("PaymentIntent not found.");
+    }
+
+    console.log("Retrieved payment intent status:", paymentIntent.status);
+
+    // Determine the status based on the Stripe payment intent status
+    let status;
+    switch (paymentIntent.status) {
+      case "succeeded":
+        status = PAYMENT_STATUS.SUCCESS;
+        break;
+      case "requires_payment_method":
+      case "requires_confirmation":
+      case "requires_action":
+        status = PAYMENT_STATUS.PENDING;
+        break;
+      case "canceled":
+      case "requires_capture":
+      case "processing":
+      default:
+        status = PAYMENT_STATUS.FAILED;
+        break;
+    }
+
+    console.log("Updating payment status to:", status);
+
+    // Update the payment status in the database
+    const updatedPayment = await Payment.findOneAndUpdate(
+      { paymentIntentId },
+      { status },
+      { new: true }
+    );
+
+    if (!updatedPayment) {
+      return res.status(404).send("Payment not found.");
+    }
+
+    console.log("Updated payment:", updatedPayment);
+
+    res.json(updatedPayment);
+  } catch (error) {
+    console.error("Error updating payment status:", error);
+    res.status(500).send("Server error. Please try again later.");
+  }
+};
