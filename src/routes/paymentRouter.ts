@@ -1,30 +1,25 @@
-import express from 'express';
+import express from "express";
+import { verifyToken } from "../middleware/verifyTokenMiddleware.js";
 import {
+  //   createPaymentIntentHandler,
+  //   paymentStatusUpdateHandler,
   createStripePaymentIntentHandler,
-  createPayPalPaymentHandler
-} from '../controllers/paymentController.js';
+  // createPayPalPaymentHandler,
+} from "../controllers/paymentController.js";
 
 const paymentRoutes = express.Router();
 
+// paymentRoutes.post('/create-payment-intent', createPaymentIntentHandler);
+// paymentRoutes.post('/update-payment-status', paymentStatusUpdateHandler);
+
 // Route for creating a Stripe Payment Intent
-paymentRoutes.post('/stripe/create-payment-intent', createStripePaymentIntentHandler);
+paymentRoutes.post(
+  "/stripe/create-payment-intent",
+  verifyToken,
+  createStripePaymentIntentHandler
+);
 
 // Route for creating a PayPal Payment
-paymentRoutes.post('/paypal/create-payment', createPayPalPaymentHandler);
-
-// Route for getting payment route information or status
-// paymentRoutes.get('/payment', (req, res) => {
-//   res.status(200).json({
-//     message: 'Payment API is running',
-//     routes: {
-//       stripe: {
-//         createPaymentIntent: '/payment/stripe/create-payment-intent'
-//       },
-//       paypal: {
-//         createPayment: '/payment/paypal/create-payment'
-//       }
-//     }
-//   });
-// });
+// paymentRoutes.post("/paypal/create-payment", createPayPalPaymentHandler);
 
 export default paymentRoutes;
