@@ -25,8 +25,7 @@ const protoSkillSchema = new Schema<IProtoSkill>({
   // this title prop is used internally in BE for comparison purposes
   protoSkillTitleLower: {
     type: String,
-    unique: true,
-    // select: false
+    unique: true
   },
   protoSkillDescription: {
     type: String,

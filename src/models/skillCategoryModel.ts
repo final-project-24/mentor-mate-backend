@@ -22,8 +22,7 @@ const skillCategorySchema = new Schema<ISkillCategory>({
   // this title prop is used internally in BE for comparison purposes
   skillCategoryTitleLower: {
     type: String,
-    unique: true,
-    select: false
+    unique: true
   },
   skillCategoryDescription: {
     type: String
@@ -77,7 +76,7 @@ skillCategorySchema.pre<ISkillCategory>('save', function (next) {
 })
 
 // ! set hook
-// excludes skillCategoryTitleLower prop from response object when using .json() method
+// excludes model props from response object when using .json() method
 skillCategorySchema.set('toJSON', {
   transform: function (_, ret) {
     delete ret.skillCategoryTitleLower
