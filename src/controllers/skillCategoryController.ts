@@ -21,20 +21,18 @@ export const getSkillCategories = async (req: Request, res: Response) => {
     const totalPages = Math.ceil(totalItems / limit)
 
     // response
-    if (page > totalPages && categories.length > 0) {
-      res.status(400).json({msg: `Requested skill category page exceeds the number of available pages`})
-    } else if (categories.length === 0) {
-      res.status(200).json({msg: 'Skill category collection is empty'})
+    if (page > totalPages || categories.length === 0) {
+      return res.status(400).json({msg: 'Requested skill categories page exceeds the number of available pages or skill categories collection is empty'})
     } else if (categories.length > 0) {
-      res.status(200).json({
+      return res.status(200).json({
         categories,
         page,
-        totalPages: totalPages,
-        totalItems: totalItems
+        totalPages,
+        totalItems
       })
     }
   } catch (error) {
-    res.status(500).json({error: error.message})
+    return res.status(500).json({error: error.message})
   }
 }
 
@@ -53,9 +51,9 @@ export const createSkillCategory = async (req: Request, res: Response) => {
       skillCategoryDescription
     })
 
-    res.status(201).json({category})
+    return res.status(201).json({category})
   } catch (error) {
-    res.status(500).json({error: error.message})
+    return res.status(500).json({error: error.message})
   }
 }
 
@@ -78,7 +76,7 @@ export const editSkillCategory = async (req: Request, res: Response) => {
       ? res.status(200).json({updatedCategory})
       : res.status(404).json({msg: 'Category not found'})
   } catch (error) {
-    res.status(500).json({error: error.message})
+    return res.status(500).json({error: error.message})
   }
 }
 
@@ -114,6 +112,6 @@ export const deleteSkillCategory = async (req: Request, res: Response) => {
       ? res.status(200).json({msg: 'Category deleted successfully'})
       : res.status(404).json({msg: 'Category not found'})
   } catch (error) {
-    res.status(500).json({error: error.message})
+    return res.status(500).json({error: error.message})
   }
 }

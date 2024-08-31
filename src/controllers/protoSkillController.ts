@@ -23,20 +23,18 @@ export const getProtoSkills = async (req: Request, res: Response) => {
     const totalPages = Math.ceil(totalItems / limit)
 
     // response
-    if (page > totalPages && skills.length > 0) {
-      res.status(400).json({msg: `Requested skills page exceeds the number of available pages`})
-    } else if (skills.length === 0) {
-      res.status(200).json({msg: 'Skills collection is empty'})
+    if (page > totalPages || skills.length === 0) {
+      return res.status(400).json({msg: 'Requested proto skills page exceeds the number of available pages or proto skills collection is empty'})
     } else if (skills.length > 0) {
-      res.status(200).json({
+      return res.status(200).json({
         skills,
         page,
-        totalPages: totalPages,
-        totalItems: totalItems
+        totalPages,
+        totalItems
       })
     }
   } catch (error) {
-    res.status(500).json({error: error.message})
+    return res.status(500).json({error: error.message})
   }
 }
 
@@ -67,12 +65,12 @@ export const createProtoSkill = async (req: Request, res: Response) => {
         .findById(skill._id)
         .populate('skillCategoryId', 'skillCategoryTitle')
 
-      res.status(201).json({populatedSkill})
+      return res.status(201).json({populatedSkill})
     } else {
-      res.status(404).json({error: 'Skill not found'})
+      return res.status(404).json({error: 'Skill not found'})
     }
   } catch (error) {
-    res.status(500).json({error: error.message})
+    return res.status(500).json({error: error.message})
   }
 }
 
@@ -95,12 +93,12 @@ export const editProtoSkill = async (req: Request, res: Response) => {
         .findById(id)
         .populate('skillCategoryId', 'skillCategoryTitle')
 
-      res.status(200).json({populatedSkill})
+      return res.status(200).json({populatedSkill})
     } else {
-      res.status(404).json({msg: 'Skill not found'})
+      return res.status(404).json({msg: 'Skill not found'})
     }
   } catch (error) {
-    res.status(500).json({error: error.message})
+    return res.status(500).json({error: error.message})
   }
 }
 
@@ -134,6 +132,6 @@ export const deleteProtoSkill = async (req: Request, res: Response) => {
       ? res.status(200).json({msg: 'Skill deleted successfully'})
       : res.status(404).json({msg: 'Skill not found'})
   } catch (error) {
-    res.status(500).json({error: error.message})
+    return res.status(500).json({error: error.message})
   }
 }
