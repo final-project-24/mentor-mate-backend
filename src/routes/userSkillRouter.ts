@@ -8,9 +8,9 @@ import {
   getUserSkills,
   createUserSkill,
   editUserSkill,
-  deleteUserSkill,
-  getMentorSkills
+  deleteUserSkill
 } from "../controllers/userSkillController.js";
+import { filteringParamsValidationChain } from "../middleware/validationChains/filteringParamsValidationChain.js";
 
 const userSkillRoutes = express.Router()
 
@@ -24,14 +24,8 @@ userSkillRoutes.use(verifyToken)
 userSkillRoutes.get(
   '/get-user-skills', 
   validate(paginationParamsValidationChain),
+  validate(filteringParamsValidationChain),
   getUserSkills
-)
-
-// ... /app/user-skill/get-mentor-skills?queryParams
-userSkillRoutes.get(
-  '/get-mentor-skills',
-  validate(paginationParamsValidationChain),
-  getMentorSkills
 )
 
 // ... /app/user-skill/create-user-skill

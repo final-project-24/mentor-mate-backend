@@ -2,8 +2,8 @@ import { check } from "express-validator";
 
 export const skillCategoryValidationChain = [
   check('skillCategoryTitle')
-    .notEmpty()
-      .withMessage('Skill category title is required')
+    // .notEmpty()
+    //   .withMessage('Skill category title is required')
     .trim()
     .isLength({min: 3, max: 100})
       .withMessage('Skill category title must be between 3 and 100 characters long'),
