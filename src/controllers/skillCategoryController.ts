@@ -22,7 +22,7 @@ export const getSkillCategories = async (req: Request, res: Response) => {
 
     // response
     if (page > totalPages || categories.length === 0) {
-      return res.status(400).json({msg: 'Requested skill categories page exceeds the number of available pages or skill categories collection is empty'})
+      return res.status(400).json({error: 'Requested skill categories page exceeds the number of available pages or skill categories collection is empty'})
     } else if (categories.length > 0) {
       return res.status(200).json({
         categories,
@@ -74,7 +74,7 @@ export const editSkillCategory = async (req: Request, res: Response) => {
 
     return updatedCategory
       ? res.status(200).json({updatedCategory})
-      : res.status(404).json({msg: 'Category not found'})
+      : res.status(404).json({error: 'Category not found'})
   } catch (error) {
     return res.status(500).json({error: error.message})
   }
@@ -92,7 +92,7 @@ export const deleteSkillCategory = async (req: Request, res: Response) => {
 
     // return deleteCategory
     //   ? res.status(200).json({msg: 'Category deleted successfully'})
-    //   : res.status(404).json({msg: 'Category not found'})
+    //   : res.status(404).json({error: 'Category not found'})
 
     // ! soft delete
     // count the proto skills that use the category to be deleted
@@ -110,7 +110,7 @@ export const deleteSkillCategory = async (req: Request, res: Response) => {
 
     return deactivateCategory
       ? res.status(200).json({msg: 'Category deleted successfully'})
-      : res.status(404).json({msg: 'Category not found'})
+      : res.status(404).json({error: 'Category not found'})
   } catch (error) {
     return res.status(500).json({error: error.message})
   }

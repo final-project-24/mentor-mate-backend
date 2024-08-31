@@ -24,7 +24,7 @@ export const getProtoSkills = async (req: Request, res: Response) => {
 
     // response
     if (page > totalPages || skills.length === 0) {
-      return res.status(400).json({msg: 'Requested proto skills page exceeds the number of available pages or proto skills collection is empty'})
+      return res.status(400).json({error: 'Requested proto skills page exceeds the number of available pages or proto skills collection is empty'})
     } else if (skills.length > 0) {
       return res.status(200).json({
         skills,
@@ -95,7 +95,7 @@ export const editProtoSkill = async (req: Request, res: Response) => {
 
       return res.status(200).json({populatedSkill})
     } else {
-      return res.status(404).json({msg: 'Skill not found'})
+      return res.status(404).json({error: 'Skill not found'})
     }
   } catch (error) {
     return res.status(500).json({error: error.message})
@@ -113,7 +113,7 @@ export const deleteProtoSkill = async (req: Request, res: Response) => {
 
     // return deleteSkill
     //   ? res.status(200).json({msg: 'Skill deleted successfully'})
-    //   : res.status(404).json({msg: 'Skill not found'})
+    //   : res.status(404).json({error: 'Skill not found'})
 
     // ! soft delete
     const userSkillCount = await userSkillModel.countDocuments({protoSkillId: id})
@@ -130,7 +130,7 @@ export const deleteProtoSkill = async (req: Request, res: Response) => {
 
     return deactivateSkill
       ? res.status(200).json({msg: 'Skill deleted successfully'})
-      : res.status(404).json({msg: 'Skill not found'})
+      : res.status(404).json({error: 'Skill not found'})
   } catch (error) {
     return res.status(500).json({error: error.message})
   }
