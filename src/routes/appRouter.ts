@@ -1,6 +1,7 @@
 import { Router } from "express";
 import testRoutes from "./testRoutes.js";
 import userRoutes from "./userRoutes.js";
+import searchRoutes from './searchRouter.js';
 import calendarRoutes from './calendarRouter.js';
 import paymentRoutes from './paymentRouter.js';
 import sessionRoutes from './sessionRouter.js';
@@ -15,6 +16,7 @@ const appRouter = Router();
 
 appRouter.use("/test", testRoutes);
 appRouter.use("/user", userRoutes);
+appRouter.use('/search', searchRoutes);
 appRouter.use('/calendar', calendarRoutes);
 appRouter.use('/payment', paymentRoutes);
 appRouter.use('/session', sessionRoutes); 
