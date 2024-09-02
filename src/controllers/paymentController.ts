@@ -1,4 +1,6 @@
 import Stripe from "stripe";
+import axios from "axios";
+>>>>>>> origin/main
 import Payment from "../models/paymentModel.js";
 import Calendar from "../models/calendarModel.js";
 
@@ -12,20 +14,16 @@ const PAYMENT_STATUS = {
 export const createStripePaymentIntentHandler = async (req, res) => {
   const { bookingId } = req.body;
   const { userId, userRole } = req;
-
   console.log("Received request to create payment intent");
   console.log("Request body:", req.body);
   console.log("User ID:", userId);
   console.log("User Role:", userRole);
-
-  // Validate booking ID
   if (!bookingId) {
     console.log("Booking ID is missing");
     return res.status(400).send("Booking ID is required.");
   }
 
   try {
-    // Determine if the user is a mentee
     const isMentee = userRole === "mentee";
     console.log("Is Mentee:", isMentee);
 
@@ -34,18 +32,15 @@ export const createStripePaymentIntentHandler = async (req, res) => {
       return res.status(400).send("User must be a mentee to make a payment.");
     }
 
-    // Fetch the calendar event using the booking ID to get the price
+    // Fetch the amount (price) from the Calendar model using bookingId
     const calendarEvent = await Calendar.findById(bookingId);
     if (!calendarEvent) {
       console.log("Booking not found for ID:", bookingId);
       return res.status(404).send("Booking not found.");
     }
 
-    // Convert the price to cents for Stripe
-    const amount = calendarEvent.price * 100;
+    const amount = calendarEvent.price * 100; // Convert to cents for Stripe
     console.log("Amount to be charged (in cents):", amount);
-
-    // Create a payment intent with Stripe
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
       currency: "usd",

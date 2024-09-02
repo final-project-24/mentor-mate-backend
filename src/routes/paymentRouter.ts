@@ -4,7 +4,6 @@ import {
   //   createPaymentIntentHandler,
   //   paymentStatusUpdateHandler,
   createStripePaymentIntentHandler,
-  // createPayPalPaymentHandler,
 } from "../controllers/paymentController.js";
 
 const paymentRoutes = express.Router();
