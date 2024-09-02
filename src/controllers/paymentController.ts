@@ -1,6 +1,5 @@
 import Stripe from "stripe";
 import axios from "axios";
->>>>>>> origin/main
 import Payment from "../models/paymentModel.js";
 import Calendar from "../models/calendarModel.js";
 
