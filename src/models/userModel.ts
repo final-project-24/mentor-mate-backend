@@ -17,6 +17,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    userNameLower: {
+      type: String,
+      unique: true
+    }, // this title prop is used internally in BE for comparison purposes
     email: {
       type: String,
       required: true,
@@ -36,14 +40,6 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "mentor", "mentee"],
     },
     originalRole: { type: String }, // New field to store the original role
-    // skills: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Skill",
-    //     default: [],
-    //   },
-    // ],
-    // Add these fields for password reset functionality
     resetPasswordToken: {
       type: String,
     },
@@ -58,9 +54,19 @@ const userSchema = new mongoose.Schema(
 
 // Middleware to remove confirmPassword before saving
 userSchema.pre("save", async function (next) {
+  this.userNameLower = this.userName.toLowerCase()
   this.confirmPassword = undefined; // pre() method is used to delete the confirmPassword before saving it to the database
   next();
 });
+
+// ! set hook
+// excludes model props from response object when using .json() method
+userSchema.set('toJSON', {
+  transform: function (_, ret) {
+    delete ret.userNameLower
+    return ret
+  }
+})
 
 const userModel = mongoose.model("User", userSchema, "users");
 

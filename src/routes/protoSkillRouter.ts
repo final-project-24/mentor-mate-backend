@@ -19,7 +19,7 @@ protoSkillRoutes.use(verifyToken)
 // apply checkIfAdmin to all routes
 // protoSkillRoutes.use(requireSpecificRole('admin'))
 
-// ... /app/proto-skill/get-proto-skills/?queryParams
+// ... /app/proto-skill/get-proto-skills?queryParams
 protoSkillRoutes.get(
   '/get-proto-skills',
   validate(paginationParamsValidationChain),
