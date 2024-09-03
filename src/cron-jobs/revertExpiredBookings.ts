@@ -25,6 +25,7 @@ cron.schedule("*/5 * * * *", async () => {
         menteeId: null,
         menteeUuid: null,
         paymentDeadline: null,
+        selectedSkill: [],
       }
     );
 
