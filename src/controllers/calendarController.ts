@@ -65,17 +65,30 @@ export const addCalendarEvent = async (req: Request, res: Response) => {
       })
       .lean(); // Convert to plain JavaScript objects
 
-    console.log(`✅ Found ${skills.length} skills for mentor: ${mentor.uuid}`);
-    console.log("Incoming skill data structure:", skills);
+    // Map skills to availableTopics format
+    const availableSkills = skills.map((skill) => ({
+      skillCategoryTitle: skill.protoSkillId.skillCategoryId.skillCategoryTitle,
+      skillCategoryDescription:
+        skill.protoSkillId.skillCategoryId.skillCategoryDescription,
+      protoSkillTitle: skill.protoSkillId.protoSkillTitle,
+      protoSkillDescription: skill.protoSkillId.protoSkillDescription,
+      proficiency: skill.proficiency,
+    }));
+
+    console.log(
+      `✅ Found ${availableSkills.length} skills for mentor: ${mentor.uuid}`
+    );
+    console.log("Incoming skill data structure:", availableSkills);
 
     const newEvent = new Calendar({
       ...req.body, // Spread the request body to get the title, description, start, and end
       mentorId: req.userId, // add the mentorId
       mentorUuid: mentor.uuid, // Add mentorUuid
       status: "available", // Set the status to available
-      price: 45.0, // Add the price for the session
-      skills, // Add the entire skills object to the event
+      price: 90.0, // Add the price for the session
+      availableSkills, // Add the entire skills object to the event
     }); // Create a new calendar event
+
     const savedEvent = await newEvent.save(); // Save the new calendar event
     console.log("✅ New calendar event saved:", savedEvent);
     res.status(201).json(savedEvent);
@@ -87,6 +100,7 @@ export const addCalendarEvent = async (req: Request, res: Response) => {
 
 // Book a calendar event (mentee books a slot) ==================================
 export const bookCalendarEvent = async (req, res) => {
+  // export const bookCalendarEvent = async (req: Request, res: Response) => {
   try {
     if (req.userRole !== "mentee") {
       return res
@@ -104,6 +118,30 @@ export const bookCalendarEvent = async (req, res) => {
       return res.status(404).json({ message: "Mentee not found" });
     } // Check if the mentee exists and provide the menteeUuid
 
+     // Fetch the skill data using the skill ID from the request body
+     const skill = await userSkillModel
+     .findById(req.body.skillId)
+     .populate({
+       path: "protoSkillId",
+       populate: {
+         path: "skillCategoryId",
+       },
+     })
+     .lean();
+
+    if (!skill) {
+      return res.status(404).json({ message: "Skill not found" });
+    }
+
+    const selectedSkill = {
+      skillCategoryTitle: skill.protoSkillId.skillCategoryId.skillCategoryTitle,
+      skillCategoryDescription:
+        skill.protoSkillId.skillCategoryId.skillCategoryDescription,
+      protoSkillTitle: skill.protoSkillId.protoSkillTitle,
+      protoSkillDescription: skill.protoSkillId.protoSkillDescription,
+      proficiency: skill.proficiency,
+    };
+
     const paymentDeadline = new Date();
     paymentDeadline.setMinutes(paymentDeadline.getMinutes() + 15); // Set deadline to 15 minutes from now
 
@@ -111,6 +149,8 @@ export const bookCalendarEvent = async (req, res) => {
     event.menteeId = req.userId; // Add menteeId
     event.menteeUuid = mentee.uuid; // Add menteeUuid
     event.paymentDeadline = paymentDeadline; // Set the payment deadline
+    event.selectedSkill = [selectedSkill]; // Add the chosen skill to the event
+
     const updatedEvent = await event.save(); // Save the updated event
     console.log("✅ Calendar event booked (pending payment):", updatedEvent);
     res.status(200).json(updatedEvent);
