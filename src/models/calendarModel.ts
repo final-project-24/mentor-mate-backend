@@ -24,6 +24,12 @@ const calendarSchema = new mongoose.Schema({
   menteeUuid: { type: String, index: true }, // Add an index for performance
   paymentDeadline: { type: Date }, // New field to track payment deadline
   price: { type: Number, required: true, default: 45.00 }, // Add price field
+  skills: [{ type: mongoose.Schema.Types.Mixed }], // Add skills field as an array of mixed types
+  skillCategoryTitle: { type: String }, // Add skill category title
+  skillCategoryDescription: { type: String }, // Add skill category description
+  protoSkillTitle: { type: String }, // Add proto skill title
+  protoSkillDescription: { type: String }, // Add proto skill description
+  proficiency: { type: String }, // Add proficiency
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

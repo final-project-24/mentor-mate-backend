@@ -1,5 +1,7 @@
+import { Request, Response } from "express";
 import Calendar from "../models/calendarModel.js";
 import User from "../models/userModel.js";
+import userSkillModel from "../models/userSkillModel.js";
 
 // Get available slots for a specific mentor ===================================
 export const getMentorAvailability = async (req, res) => {
@@ -38,7 +40,7 @@ export const getMentorAvailability = async (req, res) => {
 };
 
 // Mentor adds available time slots ============================================
-export const addCalendarEvent = async (req, res) => {
+export const addCalendarEvent = async (req: Request, res: Response) => {
   try {
     if (req.userRole !== "mentor") {
       return res
@@ -51,12 +53,28 @@ export const addCalendarEvent = async (req, res) => {
       return res.status(404).json({ message: "Mentor not found" });
     } // Check if the mentor exists and provide the mentorUuid
 
+    // Fetch skills for the mentor
+    const skills = await userSkillModel
+      .find({ mentorUuid: mentor.uuid, isActive: true })
+      .populate({
+        path: "protoSkillId",
+        populate: {
+          path: "skillCategoryId",
+          // model: "skill_category", // Ensure the correct model is used for population
+        },
+      })
+      .lean(); // Convert to plain JavaScript objects
+
+    console.log(`✅ Found ${skills.length} skills for mentor: ${mentor.uuid}`);
+    console.log("Incoming skill data structure:", skills);
+
     const newEvent = new Calendar({
       ...req.body, // Spread the request body to get the title, description, start, and end
       mentorId: req.userId, // add the mentorId
       mentorUuid: mentor.uuid, // Add mentorUuid
       status: "available", // Set the status to available
-      price: 45.00, // Add the price for the session
+      price: 45.0, // Add the price for the session
+      skills, // Add the entire skills object to the event
     }); // Create a new calendar event
     const savedEvent = await newEvent.save(); // Save the new calendar event
     console.log("✅ New calendar event saved:", savedEvent);
