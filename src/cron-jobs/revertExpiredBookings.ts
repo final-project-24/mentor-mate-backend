@@ -21,11 +21,18 @@ cron.schedule("*/5 * * * *", async () => {
     const result = await Calendar.updateMany(
       { status: "pending", paymentDeadline: { $lt: now } },
       {
-        status: "available",
-        menteeId: null,
-        menteeUuid: null,
-        paymentDeadline: null,
-        selectedSkill: [],
+        $set: {
+          status: "available",
+          menteeId: null,
+          menteeUuid: null,
+          paymentDeadline: null,
+          selectedSkill: [],
+        },
+        // status: "available",
+        // menteeId: null,
+        // menteeUuid: null,
+        // paymentDeadline: null,
+        // selectedSkill: [],
       }
     );
 
