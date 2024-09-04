@@ -17,7 +17,7 @@ export const getSkillCategories = async (req: Request, res: Response) => {
       .sort({createdAt: -1}) // TODO: introduce sort param instead of defaulting the sort
 
     // pagination results
-    const totalItems = await skillCategoryModel.countDocuments()
+    const totalItems = await skillCategoryModel.countDocuments({isActive: true})
     const totalPages = Math.ceil(totalItems / limit)
 
     // response

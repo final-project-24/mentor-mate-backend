@@ -19,7 +19,7 @@ export const getProtoSkills = async (req: Request, res: Response) => {
       .sort({createdAt: -1}) // TODO: introduce sort param instead of defaulting the sort
 
     // pagination results
-    const totalItems = await protoSkillModel.countDocuments()
+    const totalItems = await protoSkillModel.countDocuments({isActive: true})
     const totalPages = Math.ceil(totalItems / limit)
 
     // response
