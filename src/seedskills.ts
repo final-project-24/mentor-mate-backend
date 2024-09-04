@@ -5,8 +5,17 @@ import userModel from './models/userModel.js'
 import db from './db.js'
 import bcrypt from 'bcryptjs'
 import { v4 } from 'uuid'
+import { NODE_ENV } from './utils/config.js'
 
 const hashedPW = await bcrypt.hash('1234', 10)
+
+const genereateImagePath = () => {
+  if (NODE_ENV === 'production') {
+    return "https://mentor-mate-backend.onrender.com/images/avatar.svg"
+  }
+
+  return "http://localhost:4000/images/avatar.svg"
+}
 
 // ! the whole process requires 3 mentors
 
@@ -19,6 +28,7 @@ async function seedMentors() {
       email: 'seedMentor0@seed.com',
       password: hashedPW,
       role: 'mentor',
+      image: genereateImagePath(),
       uuidv4: v4()
     },
     {
@@ -27,6 +37,7 @@ async function seedMentors() {
       email: 'seedMentor1@seed.com',
       password: hashedPW,
       role: 'mentor',
+      image: genereateImagePath(),
       uuidv4: v4()
     },
     {
@@ -35,6 +46,7 @@ async function seedMentors() {
       email: 'seedMentor2@seed.com',
       password: hashedPW,
       role: 'mentor',
+      image: genereateImagePath(),
       uuidv4: v4()
     },
     {
@@ -43,6 +55,7 @@ async function seedMentors() {
       email: 'seedMentor3@seed.com',
       password: hashedPW,
       role: 'mentor',
+      image: genereateImagePath(),
       uuidv4: v4()
     },
     {
@@ -51,6 +64,7 @@ async function seedMentors() {
       email: 'seedMentor4@seed.com',
       password: hashedPW,
       role: 'mentor',
+      image: genereateImagePath(),
       uuidv4: v4()
     },
     {
@@ -59,6 +73,7 @@ async function seedMentors() {
       email: 'seedMentor5@seed.com',
       password: hashedPW,
       role: 'mentor',
+      image: genereateImagePath(),
       uuidv4: v4()
     },
     {
@@ -67,6 +82,7 @@ async function seedMentors() {
       email: 'seedMentor6@seed.com',
       password: hashedPW,
       role: 'mentor',
+      image: genereateImagePath(),
       uuidv4: v4()
     },
     {
@@ -75,6 +91,7 @@ async function seedMentors() {
       email: 'seedMentor7@seed.com',
       password: hashedPW,
       role: 'mentor',
+      image: genereateImagePath(),
       uuidv4: v4()
     },
     {
@@ -83,6 +100,7 @@ async function seedMentors() {
       email: 'seedMentor8@seed.com',
       password: hashedPW,
       role: 'mentor',
+      image: genereateImagePath(),
       uuidv4: v4()
     }
   ]
