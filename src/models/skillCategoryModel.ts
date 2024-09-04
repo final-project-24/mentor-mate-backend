@@ -1,6 +1,7 @@
-import { Schema, Model, model } from "mongoose";
+import { Schema, Model, model, Query } from "mongoose";
 import capitalizeFirstChar from "../utils/capitalizeFirstChar.js";
 
+// extend Document with ISkillCategory
 interface ISkillCategory extends Document {
   skillCategoryTitle: string
   skillCategoryTitleLower: string
@@ -8,6 +9,12 @@ interface ISkillCategory extends Document {
   isActive: boolean
 }
 
+// extend Query with ISkillCategoryQuery and ISkillCategory
+interface ISkillCategoryQuery extends Query<any, ISkillCategory> {
+  _update: Partial<ISkillCategory>
+}
+
+// extend Model with ISkillCategoryModel
 interface ISkillCategoryModel extends Model<ISkillCategory> {
   skillCategoryAlreadyExistsByTitle(categoryTitle: string): Promise<void>
   validateCategoryChanges(data: object, id: string): Promise<void>
@@ -19,7 +26,7 @@ const skillCategorySchema = new Schema<ISkillCategory>({
     required: true,
     unique: true
   },
-  // this title prop is used internally in BE for comparison purposes
+  // this title field is used internally in BE for comparison purposes
   skillCategoryTitleLower: {
     type: String,
     unique: true
@@ -64,7 +71,8 @@ skillCategorySchema.statics.validateCategoryChanges = async function (data, id) 
     throw new Error('No category changes were detected')
 }
 
-// ! pre hook
+// ! pre hooks
+// 'save' pre hook
 skillCategorySchema.pre<ISkillCategory>('save', function (next) {
   this.skillCategoryTitle = capitalizeFirstChar(this.skillCategoryTitle)
   this.skillCategoryTitleLower = this.skillCategoryTitle.toLowerCase()
@@ -73,6 +81,21 @@ skillCategorySchema.pre<ISkillCategory>('save', function (next) {
     this.skillCategoryDescription = capitalizeFirstChar(this.skillCategoryDescription)
 
   next()
+})
+
+// 'findOneAndUpdate' pre hook
+// _update object holds key value pairs for the object specified in 'findOnceAndUpdate' query
+skillCategorySchema.pre<ISkillCategoryQuery>('findOneAndUpdate', function (next) {
+  if (this._update.skillCategoryTitle) {
+    this._update.skillCategoryTitle = capitalizeFirstChar(this._update.skillCategoryTitle);
+    this._update.skillCategoryTitleLower = this._update.skillCategoryTitle.toLowerCase();
+  }
+
+  if (this._update.skillCategoryDescription) {
+    this._update.skillCategoryDescription = capitalizeFirstChar(this._update.skillCategoryDescription);
+  }
+
+  next();
 })
 
 // ! set hook
