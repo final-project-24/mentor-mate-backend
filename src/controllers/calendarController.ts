@@ -1,7 +1,19 @@
 import { Request, Response } from "express";
 import Calendar from "../models/calendarModel.js";
 import User from "../models/userModel.js";
-import userSkillModel from "../models/userSkillModel.js";
+import userSkillModel, { IUserSkill } from "../models/userSkillModel.js";
+// import userSkillModel from "../models/userSkillModel.js";
+import { IProtoSkill } from "../models/protoSkillModel.js";
+import { ISkillCategory } from "../models/skillCategoryModel.js";
+
+// Define interfaces for populated documents
+interface PopulatedProtoSkill extends IProtoSkill {
+  skillCategoryId: ISkillCategory;
+}
+
+interface PopulatedUserSkill extends IUserSkill {
+  protoSkillId: PopulatedProtoSkill;
+}
 
 // Get available slots for a specific mentor ===================================
 export const getMentorAvailability = async (req, res) => {
@@ -65,8 +77,11 @@ export const addCalendarEvent = async (req: Request, res: Response) => {
       })
       .lean(); // Convert to plain JavaScript objects
 
+    // Type cast the skills to the populated type
+    const populatedSkills = skills as unknown as PopulatedUserSkill[];
+
     // Map skills to availableTopics format
-    const availableSkills = skills.map((skill) => ({
+    const availableSkills = populatedSkills.map((skill) => ({
       skillCategoryTitle: skill.protoSkillId.skillCategoryId.skillCategoryTitle,
       skillCategoryDescription:
         skill.protoSkillId.skillCategoryId.skillCategoryDescription,
@@ -118,28 +133,32 @@ export const bookCalendarEvent = async (req, res) => {
       return res.status(404).json({ message: "Mentee not found" });
     } // Check if the mentee exists and provide the menteeUuid
 
-     // Fetch the skill data using the skill ID from the request body
-     const skill = await userSkillModel
-     .findById(req.body.skillId)
-     .populate({
-       path: "protoSkillId",
-       populate: {
-         path: "skillCategoryId",
-       },
-     })
-     .lean();
+    // Fetch the skill data using the skill ID from the request body
+    const skill = await userSkillModel
+      .findById(req.body.skillId)
+      .populate({
+        path: "protoSkillId",
+        populate: {
+          path: "skillCategoryId",
+        },
+      })
+      .lean();
 
     if (!skill) {
       return res.status(404).json({ message: "Skill not found" });
     }
 
+    // Type cast the skill to the populated type
+    const populatedSkill = skill as unknown as PopulatedUserSkill;
+
     const selectedSkill = {
-      skillCategoryTitle: skill.protoSkillId.skillCategoryId.skillCategoryTitle,
+      skillCategoryTitle:
+        populatedSkill.protoSkillId.skillCategoryId.skillCategoryTitle,
       skillCategoryDescription:
-        skill.protoSkillId.skillCategoryId.skillCategoryDescription,
-      protoSkillTitle: skill.protoSkillId.protoSkillTitle,
-      protoSkillDescription: skill.protoSkillId.protoSkillDescription,
-      proficiency: skill.proficiency,
+        populatedSkill.protoSkillId.skillCategoryId.skillCategoryDescription,
+      protoSkillTitle: populatedSkill.protoSkillId.protoSkillTitle,
+      protoSkillDescription: populatedSkill.protoSkillId.protoSkillDescription,
+      proficiency: populatedSkill.proficiency,
     };
 
     const paymentDeadline = new Date();
