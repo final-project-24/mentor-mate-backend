@@ -1,19 +1,18 @@
 import { Request, Response } from "express";
 import Calendar from "../models/calendarModel.js";
 import User from "../models/userModel.js";
-import userSkillModel, { IUserSkill } from "../models/userSkillModel.js";
-// import userSkillModel from "../models/userSkillModel.js";
-import { IProtoSkill } from "../models/protoSkillModel.js";
-import { ISkillCategory } from "../models/skillCategoryModel.js";
+import userSkillModel from "../models/userSkillModel.js";
+import protoSkillModel from "../models/protoSkillModel.js";
+import skillCategoryModel from "../models/skillCategoryModel.js";
 
-// Define interfaces for populated documents
-interface PopulatedProtoSkill extends IProtoSkill {
-  skillCategoryId: ISkillCategory;
-}
+// // Define interfaces for populated documents
+// interface PopulatedProtoSkill extends IProtoSkill {
+//   skillCategoryId: ISkillCategory;
+// }
 
-interface PopulatedUserSkill extends IUserSkill {
-  protoSkillId: PopulatedProtoSkill;
-}
+// interface PopulatedUserSkill extends IUserSkill {
+//   protoSkillId: PopulatedProtoSkill;
+// }
 
 // Get available slots for a specific mentor ===================================
 export const getMentorAvailability = async (req, res) => {
@@ -68,27 +67,27 @@ export const addCalendarEvent = async (req: Request, res: Response) => {
     // Fetch skills for the mentor
     const skills = await userSkillModel
       .find({ mentorUuid: mentor.uuid, isActive: true })
-      .populate({
-        path: "protoSkillId",
-        populate: {
-          path: "skillCategoryId",
-          // model: "skill_category", // Ensure the correct model is used for population
-        },
+      .lean();
+
+    // Manually fetch and merge the related data
+    const availableSkills = await Promise.all(
+      skills.map(async (skill) => {
+        const protoSkill = await protoSkillModel
+          .findById(skill.protoSkillId)
+          .lean();
+        const skillCategory = await skillCategoryModel
+          .findById(protoSkill.skillCategoryId)
+          .lean();
+
+        return {
+          skillCategoryTitle: skillCategory.skillCategoryTitle,
+          skillCategoryDescription: skillCategory.skillCategoryDescription,
+          protoSkillTitle: protoSkill.protoSkillTitle,
+          protoSkillDescription: protoSkill.protoSkillDescription,
+          proficiency: skill.proficiency,
+        };
       })
-      .lean(); // Convert to plain JavaScript objects
-
-    // Type cast the skills to the populated type
-    const populatedSkills = skills as unknown as PopulatedUserSkill[];
-
-    // Map skills to availableTopics format
-    const availableSkills = populatedSkills.map((skill) => ({
-      skillCategoryTitle: skill.protoSkillId.skillCategoryId.skillCategoryTitle,
-      skillCategoryDescription:
-        skill.protoSkillId.skillCategoryId.skillCategoryDescription,
-      protoSkillTitle: skill.protoSkillId.protoSkillTitle,
-      protoSkillDescription: skill.protoSkillId.protoSkillDescription,
-      proficiency: skill.proficiency,
-    }));
+    );
 
     console.log(
       `✅ Found ${availableSkills.length} skills for mentor: ${mentor.uuid}`
@@ -134,31 +133,26 @@ export const bookCalendarEvent = async (req, res) => {
     } // Check if the mentee exists and provide the menteeUuid
 
     // Fetch the skill data using the skill ID from the request body
-    const skill = await userSkillModel
-      .findById(req.body.skillId)
-      .populate({
-        path: "protoSkillId",
-        populate: {
-          path: "skillCategoryId",
-        },
-      })
-      .lean();
+    const skill = await userSkillModel.findById(req.body.skillId).lean();
 
     if (!skill) {
       return res.status(404).json({ message: "Skill not found" });
     }
 
-    // Type cast the skill to the populated type
-    const populatedSkill = skill as unknown as PopulatedUserSkill;
+    // Manually fetch and merge the related data
+    const protoSkill = await protoSkillModel
+      .findById(skill.protoSkillId)
+      .lean();
+    const skillCategory = await skillCategoryModel
+      .findById(protoSkill.skillCategoryId)
+      .lean();
 
     const selectedSkill = {
-      skillCategoryTitle:
-        populatedSkill.protoSkillId.skillCategoryId.skillCategoryTitle,
-      skillCategoryDescription:
-        populatedSkill.protoSkillId.skillCategoryId.skillCategoryDescription,
-      protoSkillTitle: populatedSkill.protoSkillId.protoSkillTitle,
-      protoSkillDescription: populatedSkill.protoSkillId.protoSkillDescription,
-      proficiency: populatedSkill.proficiency,
+      skillCategoryTitle: skillCategory.skillCategoryTitle,
+      skillCategoryDescription: skillCategory.skillCategoryDescription,
+      protoSkillTitle: protoSkill.protoSkillTitle,
+      protoSkillDescription: protoSkill.protoSkillDescription,
+      proficiency: skill.proficiency,
     };
 
     const paymentDeadline = new Date();
