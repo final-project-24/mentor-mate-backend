@@ -18,14 +18,14 @@ export const logMiddleware = (
   console.log(`📩 Incoming request: ${req.method} ${req.path} (logMiddleware.ts)`); // Log the HTTP method and path
 
   // Optionally log query parameters (consider privacy implications)
-  // console.log(`🔎 Query Parameters:`, req.query);
+  console.log(`🔎 Query Parameters:`, req.query);
 
   // Log client IP address and User-Agent (consider privacy implications)
   // console.log(`🔎 Client IP: ${req.ip}`);
   // console.log(`🔎 User-Agent: ${req.headers["user-agent"]}`);
 
   // Log the request body
-  // console.log(`🔎 Request Body:`, req.body); // Log the request body
+  console.log(`🔎 Request Body:`, req.body); // Log the request body
   // console.log("❓ Request Body Preview Disabled"); // Log a message indicating that the preview is disabled
 
   // Enhanced logging for request headers, including conditional logging for specific headers
