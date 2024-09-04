@@ -1,6 +1,7 @@
-import { Document, Schema, Model, model } from "mongoose";
+import { Document, Schema, Model, model, Query } from "mongoose";
 import checkIfMongoId from "../utils/checkIfMongoId.js";
 
+// extend Document with IUserSkill
 interface IUserSkill extends Document {
   mentorId: string
   protoSkillId: Schema.Types.ObjectId
@@ -10,6 +11,7 @@ interface IUserSkill extends Document {
   isActive: boolean
 }
 
+// extend Model with IUserSkillModel
 interface IUserSkillModel extends Model<IUserSkill> {
   verifyUserSkillId(...ids: string[]): Promise<void>
   // restrictUserGroupsAccess(userRole: string): Promise<void>
