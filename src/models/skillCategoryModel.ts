@@ -44,7 +44,10 @@ const skillCategorySchema = new Schema<ISkillCategory>({
 
 // ! static method to check for category title conflict
 skillCategorySchema.statics.skillCategoryAlreadyExistsByTitle = async function (categoryTitle) {
-  const categoryExists = await this.findOne({skillCategoryTitleLower: categoryTitle})
+  const categoryExists = await this.findOne({
+    skillCategoryTitleLower: categoryTitle,
+    isActive: true
+  })
 
   if (categoryExists)
     throw new Error('Category with this title already exists')
