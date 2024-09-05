@@ -14,10 +14,12 @@ export const getSkillCategories = async (req: Request, res: Response) => {
       .find({isActive: true}) // find only active categories
       .skip(skip)
       .limit(limit)
-      .sort({createdAt: -1}) // TODO: introduce sort param instead of defaulting the sort
+      // TODO: introduce sort param instead of defaulting the sort
+      // TODO: sorting introduce problems with pagination (items repeated across pages)
+      // .sort({createdAt: -1})
 
     // pagination results
-    const totalItems = await skillCategoryModel.countDocuments()
+    const totalItems = await skillCategoryModel.countDocuments({isActive: true})
     const totalPages = Math.ceil(totalItems / limit)
 
     // response

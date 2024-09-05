@@ -1,19 +1,3 @@
-// import mongoose from 'mongoose';
-
-// const paymentSchema = new mongoose.Schema({
-//   amount: { type: Number, required: true },
-//   currency: { type: String, required: true },
-//   paymentIntentId: { type: String, required: true, unique: true },
-//   status: { type: String, enum: ['pending', 'succeeded', 'failed'], default: 'pending' },
-//   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-//   isMentee: { type: Boolean, required: true }, 
-//   createdAt: { type: Date, default: Date.now },
-//   updatedAt: { type: Date, default: Date.now },
-// });
-
-// const Payment = mongoose.model('Payment', paymentSchema);
-// export default Payment;
-
 import mongoose from 'mongoose';
 
 const paymentSchema = new mongoose.Schema({
@@ -42,18 +26,22 @@ const paymentSchema = new mongoose.Schema({
   },
   eventId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Calendar', // Ensure this matches your Calendar model
+    ref: 'Calendar', 
   },
   bookingId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Booking', // Ensure this matches your Booking model
+    ref: 'Booking', 
   },
   isMentee: {
     type: Boolean,
     required: true,
   },
+  expiresAt: {
+    type: Date,
+    required: true, // Expiration time for the booking
+  }
 }, {
-  timestamps: true, 
+  timestamps: true,
 });
 
 const Payment = mongoose.model('Payment', paymentSchema);

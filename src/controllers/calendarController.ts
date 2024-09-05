@@ -1,5 +1,18 @@
+import { Request, Response } from "express";
 import Calendar from "../models/calendarModel.js";
 import User from "../models/userModel.js";
+import userSkillModel from "../models/userSkillModel.js";
+import protoSkillModel from "../models/protoSkillModel.js";
+import skillCategoryModel from "../models/skillCategoryModel.js";
+
+// // Define interfaces for populated documents
+// interface PopulatedProtoSkill extends IProtoSkill {
+//   skillCategoryId: ISkillCategory;
+// }
+
+// interface PopulatedUserSkill extends IUserSkill {
+//   protoSkillId: PopulatedProtoSkill;
+// }
 
 // Get available slots for a specific mentor ===================================
 export const getMentorAvailability = async (req, res) => {
@@ -38,7 +51,7 @@ export const getMentorAvailability = async (req, res) => {
 };
 
 // Mentor adds available time slots ============================================
-export const addCalendarEvent = async (req, res) => {
+export const addCalendarEvent = async (req: Request, res: Response) => {
   try {
     if (req.userRole !== "mentor") {
       return res
@@ -51,13 +64,45 @@ export const addCalendarEvent = async (req, res) => {
       return res.status(404).json({ message: "Mentor not found" });
     } // Check if the mentor exists and provide the mentorUuid
 
+    // Fetch skills for the mentor
+    const skills = await userSkillModel
+      .find({ mentorUuid: mentor.uuid, isActive: true })
+      .lean();
+
+    // Manually fetch and merge the related data
+    const availableSkills = await Promise.all(
+      skills.map(async (skill) => {
+        const protoSkill = await protoSkillModel
+          .findById(skill.protoSkillId)
+          .lean();
+        const skillCategory = await skillCategoryModel
+          .findById(protoSkill.skillCategoryId)
+          .lean();
+
+        return {
+          skillCategoryTitle: skillCategory.skillCategoryTitle,
+          skillCategoryDescription: skillCategory.skillCategoryDescription,
+          protoSkillTitle: protoSkill.protoSkillTitle,
+          protoSkillDescription: protoSkill.protoSkillDescription,
+          proficiency: skill.proficiency,
+        };
+      })
+    );
+
+    console.log(
+      `✅ Found ${availableSkills.length} skills for mentor: ${mentor.uuid}`
+    );
+    console.log("Incoming skill data structure:", availableSkills);
+
     const newEvent = new Calendar({
       ...req.body, // Spread the request body to get the title, description, start, and end
       mentorId: req.userId, // add the mentorId
       mentorUuid: mentor.uuid, // Add mentorUuid
       status: "available", // Set the status to available
-      price: 45.00, // Add the price for the session
+      price: 90.0, // Add the price for the session
+      availableSkills, // Add the entire skills object to the event
     }); // Create a new calendar event
+
     const savedEvent = await newEvent.save(); // Save the new calendar event
     console.log("✅ New calendar event saved:", savedEvent);
     res.status(201).json(savedEvent);
@@ -69,6 +114,7 @@ export const addCalendarEvent = async (req, res) => {
 
 // Book a calendar event (mentee books a slot) ==================================
 export const bookCalendarEvent = async (req, res) => {
+  // export const bookCalendarEvent = async (req: Request, res: Response) => {
   try {
     if (req.userRole !== "mentee") {
       return res
@@ -86,6 +132,29 @@ export const bookCalendarEvent = async (req, res) => {
       return res.status(404).json({ message: "Mentee not found" });
     } // Check if the mentee exists and provide the menteeUuid
 
+    // Fetch the skill data using the skill ID from the request body
+    const skill = await userSkillModel.findById(req.body.skillId).lean();
+
+    if (!skill) {
+      return res.status(404).json({ message: "Skill not found" });
+    }
+
+    // Manually fetch and merge the related data
+    const protoSkill = await protoSkillModel
+      .findById(skill.protoSkillId)
+      .lean();
+    const skillCategory = await skillCategoryModel
+      .findById(protoSkill.skillCategoryId)
+      .lean();
+
+    const selectedSkill = {
+      skillCategoryTitle: skillCategory.skillCategoryTitle,
+      skillCategoryDescription: skillCategory.skillCategoryDescription,
+      protoSkillTitle: protoSkill.protoSkillTitle,
+      protoSkillDescription: protoSkill.protoSkillDescription,
+      proficiency: skill.proficiency,
+    };
+
     const paymentDeadline = new Date();
     paymentDeadline.setMinutes(paymentDeadline.getMinutes() + 15); // Set deadline to 15 minutes from now
 
@@ -93,6 +162,8 @@ export const bookCalendarEvent = async (req, res) => {
     event.menteeId = req.userId; // Add menteeId
     event.menteeUuid = mentee.uuid; // Add menteeUuid
     event.paymentDeadline = paymentDeadline; // Set the payment deadline
+    event.selectedSkill = [selectedSkill]; // Add the chosen skill to the event
+
     const updatedEvent = await event.save(); // Save the updated event
     console.log("✅ Calendar event booked (pending payment):", updatedEvent);
     res.status(200).json(updatedEvent);

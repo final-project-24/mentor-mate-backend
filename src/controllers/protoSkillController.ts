@@ -16,10 +16,12 @@ export const getProtoSkills = async (req: Request, res: Response) => {
       .skip(skip)
       .limit(limit)
       .populate('skillCategoryId', 'skillCategoryTitle')
-      .sort({createdAt: -1}) // TODO: introduce sort param instead of defaulting the sort
+      // TODO: introduce sort param instead of defaulting the sort
+      // TODO: sorting introduce problems with pagination (items repeated across pages)
+      // .sort({createdAt: -1}) 
 
     // pagination results
-    const totalItems = await protoSkillModel.countDocuments()
+    const totalItems = await protoSkillModel.countDocuments({isActive: true})
     const totalPages = Math.ceil(totalItems / limit)
 
     // response

@@ -1,7 +1,8 @@
-import { Document, Schema, Model, model } from "mongoose";
+import { Document, Schema, Model, model, Query } from "mongoose";
 import capitalizeFirstChar from "../utils/capitalizeFirstChar.js";
 import checkIfMongoId from "../utils/checkIfMongoId.js";
 
+// extend Document with IProtoSkill
 interface IProtoSkill extends Document {
   protoSkillTitle: string
   protoSkillTitleLower: string
@@ -10,6 +11,12 @@ interface IProtoSkill extends Document {
   isActive: boolean
 }
 
+// extend Query with IProtoSkillQuery and IProtoSkill
+interface IProtoSkillQuery extends Query<any, IProtoSkill> {
+  _update: Partial<IProtoSkill>
+}
+
+// extend Model with IProtoSkillModel
 interface IProtoSkillModel extends Model<IProtoSkill> {
   verifySkillCategoryId(...ids: string[]): Promise<void>
   skillAlreadyExistsByTitle(skillTitle: any): Promise<void>
@@ -51,7 +58,10 @@ protoSkillSchema.statics.verifySkillCategoryId = function (id) {
 
 // ! static method to check for skill title conflict
 protoSkillSchema.statics.skillAlreadyExistsByTitle = async function (skillTitle) {
-  const skillExists = await this.findOne({protoSkillTitleLower: skillTitle.toLowerCase()})
+  const skillExists = await this.findOne({
+    protoSkillTitleLower: skillTitle.toLowerCase(),
+    isActive: true
+  })
 
   if (skillExists) 
     throw new Error('Skill with this title already exists')
@@ -78,7 +88,8 @@ protoSkillSchema.statics.validateSkillChanges = async function (data, id) {
     throw new Error('No skill changes were detected')
 }
 
-// ! pre hook
+// ! pre hooks
+// 'save' pre hook
 protoSkillSchema.pre<IProtoSkill>('save', function (next) {
   this.protoSkillTitle = capitalizeFirstChar(this.protoSkillTitle)
   this.protoSkillTitleLower = this.protoSkillTitle.toLowerCase()
@@ -87,6 +98,21 @@ protoSkillSchema.pre<IProtoSkill>('save', function (next) {
     this.protoSkillDescription = capitalizeFirstChar(this.protoSkillDescription)
 
   next()
+})
+
+// 'findOneAndUpdate' pre hook
+// _update object holds key value pairs for the object specified in 'findOnceAndUpdate' query
+protoSkillSchema.pre<IProtoSkillQuery>('findOneAndUpdate', function (next) {
+  if (this._update.protoSkillTitle) {
+    this._update.protoSkillTitle = capitalizeFirstChar(this._update.protoSkillTitle);
+    this._update.protoSkillTitleLower = this._update.protoSkillTitleLower.toLowerCase();
+  }
+
+  if (this._update.protoSkillDescription) {
+    this._update.protoSkillDescription = capitalizeFirstChar(this._update.protoSkillDescription);
+  }
+
+  next();
 })
 
 // ! set hook
