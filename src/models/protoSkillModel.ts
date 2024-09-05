@@ -58,7 +58,10 @@ protoSkillSchema.statics.verifySkillCategoryId = function (id) {
 
 // ! static method to check for skill title conflict
 protoSkillSchema.statics.skillAlreadyExistsByTitle = async function (skillTitle) {
-  const skillExists = await this.findOne({protoSkillTitleLower: skillTitle.toLowerCase()})
+  const skillExists = await this.findOne({
+    protoSkillTitleLower: skillTitle.toLowerCase(),
+    isActive: true
+  })
 
   if (skillExists) 
     throw new Error('Skill with this title already exists')
