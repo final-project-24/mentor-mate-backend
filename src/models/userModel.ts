@@ -18,8 +18,7 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     userNameLower: {
-      type: String,
-      unique: true
+      type: String
     }, // this userName prop is used internally in BE for comparison purposes
     email: {
       type: String,
