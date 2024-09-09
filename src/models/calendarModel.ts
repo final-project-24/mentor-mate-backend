@@ -50,6 +50,9 @@ const calendarSchema = new mongoose.Schema({
     },
   ],
 
+  jitsiLink: { type: String },
+  googleMeetLink: { type: String },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
