@@ -5,17 +5,17 @@ import {
   addCalendarEvent,
   bookCalendarEvent,
   getBookingDetails,
-  getUpcomingSessions,
-  getPastSessions,
+  // getUpcomingSessions,
+  // getPastSessions,
 } from "../controllers/calendarController.js";
 
 const calendarRoutes = express.Router();
 
-// http://localhost:4000/app/calendar/upcoming-sessions
-calendarRoutes.get("/upcoming-sessions", verifyToken, getUpcomingSessions);
+// // http://localhost:4000/app/calendar/upcoming-sessions
+// calendarRoutes.get("/upcoming-sessions", verifyToken, getUpcomingSessions);
 
-// http://localhost:4000/app/calendar/past-sessions
-calendarRoutes.get("/past-sessions", verifyToken, getPastSessions);
+// // http://localhost:4000/app/calendar/past-sessions
+// calendarRoutes.get("/past-sessions", verifyToken, getPastSessions);
 
 // http://localhost:4000/app/calendar/:mentorUuid
 calendarRoutes.get("/:mentorUuid", verifyToken, getMentorAvailability);
