@@ -161,7 +161,7 @@ export const searchMentors = async (req: Request, res: Response) => {
     );
 
     console.log("✅ Successfully fetched mentors and their skills");
-    res.json(mentorsWithSkills);
+    res.status(200).json(mentorsWithSkills);
   } catch (error) {
     console.error("❌ Error searching mentors:", error); // Add logging
     res.status(500).json({ error: "Internal server error" });
@@ -289,7 +289,7 @@ export const getMentorsByUuid = async (req: MentorSearchRequest, res: Response) 
     );
 
     console.log("✅ Successfully fetched mentors and their skills");
-    res.json(mentorsWithSkills);
+    res.status(200).json(mentorsWithSkills);
   } catch (error) {
     console.error("❌ Error searching mentors:", error);
     res.status(500).json({ error: "Internal server error" });
