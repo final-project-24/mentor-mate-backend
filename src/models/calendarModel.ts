@@ -30,7 +30,7 @@ const calendarSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: ["available", "booked", "pending"], // Add a new status "pending"
+    enum: ["available", "booked", "pending", "canceled"], // Add a new status "canceled"
     default: "available",
   },
 
