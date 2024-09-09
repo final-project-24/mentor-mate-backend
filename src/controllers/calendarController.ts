@@ -113,6 +113,17 @@ export const addCalendarEvent = async (req: Request, res: Response) => {
 };
 
 // Book a calendar event (mentee books a slot) ==================================
+
+// Marina logic ========
+const generateJitsiLink = (roomName) => {
+  return `https://meet.jit.si/${roomName}`;
+};
+
+const generateGoogleMeetLink = (roomName) => {
+  return `https://meet.google.com/${roomName}`;
+};
+// =====================
+
 export const bookCalendarEvent = async (req, res) => {
   // export const bookCalendarEvent = async (req: Request, res: Response) => {
   try {
@@ -134,7 +145,6 @@ export const bookCalendarEvent = async (req, res) => {
 
     // Fetch the skill data using the skill ID from the request body
     const skill = await userSkillModel.findById(req.body.skillId).lean();
-
     if (!skill) {
       return res.status(404).json({ message: "Skill not found" });
     }
@@ -158,11 +168,20 @@ export const bookCalendarEvent = async (req, res) => {
     const paymentDeadline = new Date();
     paymentDeadline.setMinutes(paymentDeadline.getMinutes() + 15); // Set deadline to 15 minutes from now
 
+    // Marina logic ========
+    const jitsiLink = generateJitsiLink(event._id);
+    const googleMeetLink = generateGoogleMeetLink(event._id);
+    // =====================
+
     event.status = "pending"; // Set the status to pending
     event.menteeId = req.userId; // Add menteeId
     event.menteeUuid = mentee.uuid; // Add menteeUuid
     event.paymentDeadline = paymentDeadline; // Set the payment deadline
     event.selectedSkill = [selectedSkill]; // Add the chosen skill to the event
+    // Marina logic ========
+    event.jitsiLink = jitsiLink;
+    event.googleMeetLink = googleMeetLink;
+    // =====================
 
     const updatedEvent = await event.save(); // Save the updated event
     console.log("✅ Calendar event booked (pending payment):", updatedEvent);
@@ -191,6 +210,106 @@ export const getBookingDetails = async (req, res) => {
     res.json(booking);
   } catch (error) {
     console.error("❌ Error fetching booking details:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// get all upcoming sessions ==================================================
+
+export const getUpcomingSessions = async (req: Request, res: Response) => {
+  try {
+    console.log("🔍 Incoming request to get upcoming sessions");
+
+    const userId = req.userId; // Extract userId from the request
+    const userRole = req.userRole; // Extract userRole from the request
+    console.log(`🔎 Extracted userId from request: ${userId}`);
+    console.log(`🔎 Extracted userRole from request: ${userRole}`);
+
+    const currentDate = new Date(); // Get the current date
+    console.log(`🔎 Current date: ${currentDate}`);
+
+    // Define the query object with a more flexible type
+    let query: {
+      start: { $gt: Date };
+      status: string;
+      menteeId?: string;
+      mentorId?: string;
+    } = { start: { $gt: currentDate }, status: "booked" };
+
+    // Conditionally add menteeId or mentorId to the query based on the userRole
+    if (userRole === "mentee") {
+      query = { ...query, menteeId: userId };
+    } else if (userRole === "mentor") {
+      query = { ...query, mentorId: userId };
+    }
+
+    const sessions = await Calendar.find(query)
+      .populate("mentorId", "image userName role")
+      .populate("menteeId", "userName email");
+
+    console.log(`🔎 Found ${sessions.length} upcoming sessions`);
+
+    if (!sessions.length) {
+      console.log("🔎  No upcoming sessions found for this user.");
+      return res
+        .status(404)
+        .json({ message: "No upcoming sessions found for this user." });
+    }
+
+    res.status(200).json(sessions);
+    console.log("✅ Successfully fetched upcoming sessions");
+  } catch (error) {
+    console.error("❌ Error fetching upcoming session details:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// get  past sessions ==================================================
+
+export const getPastSessions = async (req: Request, res: Response) => {
+  try {
+    console.log("🔍 Incoming request to get all past sessions");
+
+    const userId = req.userId; // Extract userId from the request
+    const userRole = req.userRole; // Extract userRole from the request
+    console.log(`🔎 Extracted userId from request: ${userId}`);
+    console.log(`🔎 Extracted userRole from request: ${userRole}`);
+
+    const currentDate = new Date(); // Get the current date
+    console.log(`🔎 Current date: ${currentDate}`);
+
+    // Define the query object with a more flexible type
+    let query: {
+      start: { $lt: Date };
+      status: string;
+      menteeId?: string;
+      mentorId?: string;
+    } = { start: { $lt: currentDate }, status: "booked" };
+
+    // Conditionally add menteeId or mentorId to the query based on the userRole
+    if (userRole === "mentee") {
+      query = { ...query, menteeId: userId };
+    } else if (userRole === "mentor") {
+      query = { ...query, mentorId: userId };
+    }
+
+    const sessions = await Calendar.find(query)
+      .populate("mentorId", "image userName role")
+      .populate("menteeId", "userName email");
+
+    console.log(`🔎 Found ${sessions.length} past sessions`);
+
+    if (!sessions.length) {
+      console.log("🔎  No past sessions found for this user.");
+      return res
+        .status(404)
+        .json({ message: "No past sessions found for this user." });
+    }
+
+    res.status(200).json(sessions);
+    console.log("✅ Successfully fetched past sessions");
+  } catch (error) {
+    console.error("❌ Error fetching past session details:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

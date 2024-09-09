@@ -8,6 +8,9 @@ const feedbackSchema = new mongoose.Schema({
   rating: { type: Number },
   additionalComment: { type: String }, 
   isMentor: { type: Boolean, required: true },
+  bookingId: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking', required: true }, // Add bookingId field
+  menteeUuid: { type: String, required: false }, // Add menteeUuid field
+  mentorUuid: { type: String, required: false }, // Add mentorUuid field
 });
 
 const Feedback = mongoose.model('Feedback', feedbackSchema);
