@@ -128,7 +128,7 @@ export const cancelSession = async (req: Request, res: Response) => {
     }
 
     // Find the session
-    const session = await Calendar.findById(sessionId);
+    const session = await Session.findById(sessionId);
     if (!session) {
       console.log("❌ Session not found.");
       return res.status(404).json({ message: "Session not found." });
