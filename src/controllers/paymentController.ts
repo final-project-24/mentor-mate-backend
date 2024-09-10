@@ -187,5 +187,3 @@ export const paymentStatusUpdateHandler = async (req, res) => {
     res.status(500).send('Server error. Please try again later.');
   }
 };
-
-

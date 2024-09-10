@@ -121,14 +121,14 @@ export const cancelSession = async (req: Request, res: Response) => {
     const currentDate = new Date(); // Get the current date
     console.log(`🔎 Current date: ${currentDate}`);
 
-    // Check if userId and sessionId are valid ObjectId
+    //Check if userId and sessionId are valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(sessionId)) {
       console.log("❌ Invalid user ID or session ID.");
       return res.status(400).json({ message: "Invalid user ID or session ID." });
     }
 
     // Find the session
-    const session = await Session.findById(sessionId);
+    const session = await Calendar.findById(sessionId);
     if (!session) {
       console.log("❌ Session not found.");
       return res.status(404).json({ message: "Session not found." });
@@ -154,21 +154,23 @@ export const cancelSession = async (req: Request, res: Response) => {
 
     // Update the session status to 'canceled'
     session.status = 'canceled';
-    session.canceledBy = new mongoose.Types.ObjectId(userId); // Convert userId to ObjectId
-    session.freeSessionToken = true; // Set a flag to indicate a free token is issued
+    await createFreeSlotToken(userId);
+    // session.canceledBy = new mongoose.Types.ObjectId(userId); // Convert userId to ObjectId
     await session.save();
 
-    // Add free session token to the mentee's account
-    const mentee = await User.findById(userId);
-    if (mentee) {
-      mentee.freeSessionTokens = (mentee.freeSessionTokens || 0) + 1; // Increment the free session tokens count
-      await mentee.save();
-    }
-
-    console.log("✅ Session canceled and free token issued.");
-    res.status(200).json({ message: "Session canceled successfully. A free session token has been issued." });
+    console.log("✅ Session canceled.");
+    res.status(200).json({ message: "Session canceled successfully." });
   } catch (error) {
     console.error("❌ Error canceling the session:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
+    const createFreeSlotToken = async (userId) => {
+    // Implement your logic to issue a free slot token or equivalent here
+    console.log(`Issuing free slot token for user ${userId}`);
+   };
+
+
+
+
