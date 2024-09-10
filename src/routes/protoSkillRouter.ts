@@ -3,6 +3,7 @@ import { verifyToken } from '../middleware/verifyTokenMiddleware.js'
 import { validate } from '../middleware/validatorMiddleware.js'
 import { protoSkillValidationChain } from '../middleware/validationChains/protoSkillValidationChain.js'
 import { paginationParamsValidationChain } from '../middleware/validationChains/paginationParamsValidationChain.js'
+import { protoSkillParamsValidationChain } from '../middleware/validationChains/protoSkillParamsValiationChain.js'
 import requireSpecificRole from '../middleware/requireSpecificRoleMiddleware.js'
 import { 
   createProtoSkill, 
@@ -22,6 +23,7 @@ protoSkillRoutes.use(verifyToken)
 // ... /app/proto-skill/get-proto-skills?queryParams
 protoSkillRoutes.get(
   '/get-proto-skills',
+  validate(protoSkillParamsValidationChain),
   validate(paginationParamsValidationChain),
   getProtoSkills
 )
