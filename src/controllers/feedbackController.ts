@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import Feedback from "../models/feedbackModel.js";
 
+// submit feedback ============================================================
+
 export const submitFeedback = async (req: Request, res: Response) => {
   try {
     const { bookingId, mentorUuid, menteeUuid, ...feedbackData } = req.body; // Extract bookingId, mentorUuid, and menteeUuid from the request body
@@ -31,18 +33,33 @@ export const submitFeedback = async (req: Request, res: Response) => {
   }
 };
 
+// get feedback for a specific booking ========================================
+
 export const getFeedbacks = async (req: Request, res: Response) => {
   try {
-    const { bookingId } = req.query; // Extract bookingId from the query parameters
-    console.log("🔎 Fetching feedbacks for bookingId:", bookingId); // Log the bookingId
+    const { bookingId, mentorUuid, menteeUuid } = req.query; // Extract bookingId, mentorUuid, and menteeUuid from the query parameters
+    const userRole = req.userRole; // Extract userRole from the request (assuming verifyTokenMiddleware adds it to the request object)
 
-    // const feedbacks = await Feedback.find();
-    const feedbacks = await Feedback.find({ bookingId }); // Fetch feedbacks with the specified bookingId
-    console.log("✅ Feedbacks fetched successfully:", feedbacks); // Log the fetched feedbacks
+    console.log("🔎 Fetching feedback for bookingId:", bookingId); // Log the bookingId
+    console.log("🔎 User role:", userRole); // Log the user role
+    console.log("🔎 Mentor UUID:", mentorUuid); // Log the mentor UUID
+    console.log("🔎 Mentee UUID:", menteeUuid); // Log the mentee UUID
 
-    res.status(200).json(feedbacks);
+    let feedback;
+    if (userRole === "mentee") {
+      feedback = await Feedback.findOne({ bookingId, menteeUuid });
+    } else if (userRole === "mentor") {
+      feedback = await Feedback.findOne({ bookingId, mentorUuid });
+    }
+
+    if (!feedback) {
+      return res.status(404).json({ message: "Feedback not found" });
+    }
+
+    console.log("✅ Feedback fetched successfully:", feedback); // Log the fetched feedback
+    res.status(200).json(feedback);
   } catch (error) {
-    console.error("❌ Error fetching feedbacks:", error);
-    res.status(500).json({ message: "Error fetching feedbacks" });
+    console.error("❌ Error fetching feedback:", error);
+    res.status(500).json({ message: "Error fetching feedback" });
   }
 };
