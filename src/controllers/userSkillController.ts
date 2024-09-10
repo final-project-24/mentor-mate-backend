@@ -5,9 +5,12 @@ import protoSkillModel from "../models/protoSkillModel.js"
 import skillCategoryModel from "../models/skillCategoryModel.js"
 import syncIndexesIfNodeEnvDev from "../utils/syncIndexesIfNodeEnvDev.js"
 import checkIfMongoId from "../utils/checkIfMongoId.js"
+import mongoose from "mongoose"
 
-// define interface that accept multiple types to lay ground for multiple category groups per filtering search
+// define interface that specifies sting or array of strings type for query params
+// TODO: adjust the filtering logic to accept arrays of strings
 interface FilterUserSkillsQueryParams {
+  allSkills?: string
   isMentor?: string
   userName?: string | string[]           
   skillTitle?: string | string[]        
@@ -17,129 +20,100 @@ interface FilterUserSkillsQueryParams {
 }
 
 export const getUserSkills = async (req: Request, res: Response) => {
-  // query params
   const {
+    allSkills,
     isMentor,
-    userName, // userNameLower => userSkillModel
-    skillTitle, // protoSkillTitleLower => protoSkillModel
-    skillCategoryTitle, // skillCategoryTitleLower => skillCategoryModel
-    proficiency, // proficiency => userSkillModel
-    // rating // rating => feedbackModel
+    // userName,
+    skillTitle,
+    skillCategoryTitle,
+    proficiency,
   } = req.query as FilterUserSkillsQueryParams
 
-  // userId
   const {userId} = req
-
   // pagination params
   const page = parseInt(req.query.page as string) || 1
   const limit = parseInt(req.query.limit as string) || 10
   const skip = (page - 1) * limit
 
-  /*
-  ** FILTERS
-  */
+  try {
+    const filter: Record<string, any> = {isActive: true}
 
-  // ! initialize filter with isActive prop to return only active skills
-  // the filter object will be updated with other props depending on used filter combination
-  const filter: Record<string, any> = {isActive: true}
-
-  // ! filter by mentor ID (user ID)
-  if (isMentor === 'true') {
-    if (checkIfMongoId(userId)) {
-      filter.mentorId = userId
-    } else {
-      // return generic error to avoid exposing any association with user ID
-      return res.status(400).json('Something went wrong')
+    // isMentor param is used to get skills by user id (this could be helpful when searching for skills while logged in as a mentor)
+    if (isMentor === 'true') {
+      if (checkIfMongoId(userId)) {
+        filter.mentorId = userId // add mentorId to the filter
+      } else {
+        return res.status(400).json('Something went wrong')
+      }
     }
-  }
 
-  // ! filter by mentor username
-  if (userName && typeof userName === 'string') {
-    // fetch users IDs by username
-    const users = await userModel
-      .find({userNameLower: userName.toLowerCase()})
-      .select('_id')
+    // define an array of protoSkillIds to use in the final filter
+    // specify array elements types to be mongoose ObjectIds
+    let protoSkillIds: mongoose.Types.ObjectId[] = []
 
-    if (users.length > 0) {
-      // extract user IDs
-      const userIds = users.map(u => u._id)
-
-      console.log('✅ userIds: ', userIds)
-      
-      // update the filter object
-      filter.mentorId = userIds
-    } else {
-      return res.status(404).json({error: `Skills linked to mentor: ${userName} not found`})
-    }
-  }
-
-  // ! filter by skillCategory
-  if (skillCategoryTitle && typeof skillCategoryTitle === 'string') {
-    // fetch skill category ID by skillCategory
-    // the returned array will always have 1 object because skillCategoryTitle is unique
-    const skillCategory = await skillCategoryModel
-      .find({skillCategoryTitleLower: skillCategoryTitle.toLowerCase()})
-      .select('_id')
-
-    if (skillCategory.length > 0) {
-      // fetch proto skills IDs by skillCategoryId
-      const protoSkills = await protoSkillModel
-        .find({skillCategoryId: skillCategory[0]._id})
+    if (skillCategoryTitle && typeof skillCategoryTitle === 'string') {
+      // skillCategory search will always return an array with one element because skillCategoryTitle is unique
+      const skillCategory = await skillCategoryModel
+        .find({skillCategoryTitleLower: skillCategoryTitle.toLowerCase()})
         .select('_id')
 
-      if (protoSkills.length > 0) {
-        // extract proto skills IDs
-        const protoSkillIds = protoSkills.map(p => p._id)
+      if (skillCategory.length > 0) {
+        const protoSkills = await protoSkillModel
+          .find({skillCategoryId: skillCategory[0]._id})
+          .select('_id')
 
-        console.log('✅ protoSkillId in filter skillCategory: ', protoSkillIds)
-
-        // update the filter object
-        filter.protoSkillId = protoSkillIds
+        if (protoSkills.length > 0) {
+          // update protoSkillsIds array with found protoSkillIds
+          protoSkillIds = protoSkills.map(p => p._id)
+        } else {
+          return res.status(404).json({error: 'Error finding proto skills by skillCategoryId'})
+        }
       } else {
-        return res.status(404).json({error: 'Error finding proto skills by skillCategoryId'})
+        return res.status(404).json({error: `Skill category: ${skillCategoryTitle} not found`})
       }
-    } else {
-      return res.status(404).json({error: `Skill category: ${skillCategory} not found`})
     }
-  }
 
-  // ! filter by skill title
-  if (skillTitle && typeof skillTitle === 'string') {
-    // fetch proto skill ID by skillTitle
-    // the returned array will always have 1 object because protoSkillTitle is unique
-    const protoSkill = await protoSkillModel
-      .find({protoSkillTitleLower: skillTitle.toLowerCase()})
-      .select('_id')
+    if (skillTitle && typeof skillTitle === 'string') {
+      // protoSkill search will always return an array with one element because protoSkillTitle is unique
+      const protoSkill = await protoSkillModel
+        .find({protoSkillTitleLower: skillTitle.toLowerCase()})
+        .select('_id')
 
-    if (protoSkill.length > 0) {
-      // extract proto skill ID
-      const protoSkillId = [protoSkill[0]._id]
-
-      console.log('✅ protoSkillId in filter skillTitle: ', protoSkillId)
-
-      // update the filter object
-      filter.protoSkillId = protoSkillId
-    } else {
-      return res.status(404).json({error: `Skill ${skillTitle} not found`})
+      if (protoSkill.length > 0) {
+        // merge protoSkillIds with those found by skillTitle
+        protoSkillIds = protoSkillIds.length > 0
+          // the .equals() is a mongoose method used to compare mongoose ObjectIds
+          // the protoSkillIds array was configured to work with this data type
+          // the .some() method will return true for any array element that meets equality test and the .filter() method will return a new array with those elements
+          ? protoSkillIds.filter(id => protoSkill.some(p => p._id.equals(id)))
+          : protoSkill.map(p => p._id)
+      } else {
+        return res.status(404).json({error: `Skill ${skillTitle} not found`})
+      }
     }
-  }
 
-  // ! filter by proficiency
-  if (proficiency && typeof proficiency === 'string') {
+    // add 'protoSkillId: { $in: protoSkillIds }' as the key value pair to the filter
+    // the $in operator will cause the .find() mongoose method to find all the skills where the value of the field protoSkillId matches ObjectIds in the protoSkillIds array
+    if (protoSkillIds.length > 0) {
+      filter.protoSkillId = {$in: protoSkillIds}
+    }
 
-    console.log('✅ proficiency: ', proficiency)
+    // add proficiency to the filter
+    if (proficiency && typeof proficiency === 'string') {
+      filter.proficiency = proficiency
+    }
 
-    // update filter object
-    filter.proficiency = proficiency
-  }
+    console.log('✅ getUserSkills_finalFilterObject: ', filter)
+    
+    const filterKeys = Object.keys(filter)
 
-  console.log('✅ filter: ', filter)
+    // prevent returning all skills when the combination of filtering criteria yields no results
+    if (filterKeys[0] === 'isActive' && filterKeys.length === 1 && allSkills === 'false') {
+      // return 404 with additional error message to avoid confusion
+      return res.status(404).json({error: 'Skills not found'})
+    }
 
-  /*
-  ** RETURN RESULTS
-  */
-
-  try {
+    // run the final query using the final shape of the filter object
     const skills = await userSkillModel
       .find(filter)
       // pagination
@@ -148,18 +122,17 @@ export const getUserSkills = async (req: Request, res: Response) => {
       // populate
       .populate({
         path: 'protoSkillId',
-        populate: {
-          path: 'skillCategoryId'
-        }
+        populate: {path: 'skillCategoryId'}
       })
       .populate({
         path: 'mentorUuid',
         model: 'User',
-        localField: 'mentorUuid',     // the field in userSkill schema
-        foreignField: 'uuid',         // the field in User schema
-        select: 'uuid userName -_id'  // adjust selection as needed (minus prefix excludes fields)
+        localField: 'mentorUuid',    // the field in userSkill schema
+        foreignField: 'uuid',        // the field in User schema
+        select: 'uuid userName -_id' // adjust selection as needed (minus prefix excludes fields)
       })
 
+    // pagination results
     const totalItems = await userSkillModel.countDocuments(filter)
     const totalPages = Math.ceil(totalItems / limit)
 
@@ -310,4 +283,3 @@ export const deleteUserSkill = async (req: Request, res: Response) => {
     return res.status(500).json({error: error.message})
   }
 }
-
