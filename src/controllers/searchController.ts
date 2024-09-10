@@ -245,7 +245,6 @@ export const getMentorsByUuid = async (req: MentorSearchRequest, res: Response) 
     return res.status(400).json({ error: "Query parameter must be a non-empty array of UUID strings" });
   }
 
-  // TODO: 2nd check might not be necessary
   // check if the array is non-empty and contains only valid UUIDs
   if (query.length === 0 || !query.every(uuid => typeof uuid === 'string')) {
     return res.status(400).json({ error: "Query parameter must be a non-empty array of UUID strings" });
@@ -263,7 +262,7 @@ export const getMentorsByUuid = async (req: MentorSearchRequest, res: Response) 
       {
         _id: 0, // Exclude the _id field
       }
-    );
+    ).sort({userName: 1})
 
     console.log(`✅ Found ${mentors.length} mentors matching the query`);
 
