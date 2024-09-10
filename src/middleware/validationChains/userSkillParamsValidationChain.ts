@@ -1,15 +1,22 @@
 import { query } from "express-validator"
 
-const enumValuesIsMentor = ['true', 'false']
+const enumValuesBoolean = ['true', 'false']
 const enumValuesProficiency = ['beginner', 'intermediate', 'advanced']
 
-export const filteringParamsValidationChain = [
+export const userSkillParamsValidationChain = [
   query('isMentor')
     .trim()
     .notEmpty()
-      .withMessage(`'isMentor' is required`)
-    .isIn(enumValuesIsMentor)
+      .withMessage(`Query parameter 'isMentor' is required`)
+    .isIn(enumValuesBoolean)
       .withMessage(`Invalid 'isMentor' value. Accepted values are: true, false`),
+
+  query('allSkills')
+    .trim()
+    .notEmpty()
+      .withMessage(`Query parameter 'allSkills' is required`)
+    .isIn(enumValuesBoolean)
+      .withMessage(`Invalid 'allSkills' value. Accepted values are: true, false`),
 
   query('userName')
     .optional()
