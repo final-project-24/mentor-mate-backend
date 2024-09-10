@@ -3,16 +3,41 @@ import protoSkillModel from "../models/protoSkillModel.js"
 import userSkillModel from "../models/userSkillModel.js"
 import skillCategoryModel from "../models/skillCategoryModel.js"
 
+// define interface that specifies string or array of strings type for query params
+interface FilterProtoSkillsQueryParams {
+  allSkills?: string
+  categoryId?: string | string[]
+}
+
 export const getProtoSkills = async (req: Request, res: Response) => {
+  const {allSkills, categoryId} = req.query as FilterProtoSkillsQueryParams
+
   // pagination params
   const page = parseInt(req.query.page as string) || 1
   const limit = parseInt(req.query.limit as string) || 10
   const skip = (page - 1) * limit
 
   try {
+    const filter: Record<string, any> = {isActive: true}
+
+    // if categoryId is present add it to the filter
+    if (categoryId && typeof categoryId === 'string') {
+      filter.skillCategoryId = categoryId
+    }
+
+    console.log('✅ getProtoSkills_finalFilterObject: ', filter)
+    
+    const filterKeys = Object.keys(filter)
+
+    // prevent returning all skills when the combination of filtering criteria yields no results
+    if (filterKeys[0] === 'isActive' && filterKeys.length === 1 && allSkills === 'false') {
+      // return 404 with additional error message to avoid confusion
+      return res.status(404).json({error: 'Skills not found'})
+    }
+
     // protoSkill search based on pagination params
     const skills = await protoSkillModel
-      .find({isActive: true}) // find only active skills
+      .find(filter) // find only active skills
       .skip(skip)
       .limit(limit)
       .populate('skillCategoryId', 'skillCategoryTitle')
