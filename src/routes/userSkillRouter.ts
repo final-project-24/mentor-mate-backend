@@ -10,7 +10,7 @@ import {
   editUserSkill,
   deleteUserSkill
 } from "../controllers/userSkillController.js";
-import { filteringParamsValidationChain } from "../middleware/validationChains/filteringParamsValidationChain.js";
+import { userSkillParamsValidationChain } from "../middleware/validationChains/userSkillParamsValidationChain.js";
 
 const userSkillRoutes = express.Router()
 
@@ -24,7 +24,7 @@ userSkillRoutes.use(verifyToken)
 userSkillRoutes.get(
   '/get-user-skills', 
   validate(paginationParamsValidationChain),
-  validate(filteringParamsValidationChain),
+  validate(userSkillParamsValidationChain),
   getUserSkills
 )
 
