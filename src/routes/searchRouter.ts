@@ -8,6 +8,6 @@ searchRoutes.get('/', searchMentors);
 
 searchRoutes.get('/mentor/:mentorUuid/skills', getMentorSkills);
 
-searchRoutes.get('/mentor/by-uuid', getMentorsByUuid);
+searchRoutes.post('/mentor/by-uuid', getMentorsByUuid);
 
 export default searchRoutes;
