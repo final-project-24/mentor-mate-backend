@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import userModel from "../models/userModel.js";
 import userSkillModel from "../models/userSkillModel.js";
+import skillCategoryModel from "../models/skillCategoryModel.js";
+import protoSkillModel from "../models/protoSkillModel.js";
+import mongoose from "mongoose";
 
 // export const searchMentors = async (req: Request, res: Response) => {
 //   const { query } = req.query;
@@ -223,74 +226,95 @@ export const getMentorSkills = async (req: Request, res: Response) => {
 ** // ! GET MENTORS BY UUID
 */
 
-// extend Request with MentorSearchRequest
-interface MentorSearchRequest extends Request {
-  query: {
-    query?: string | string[]; // can be a string or array of strings
-  };
+// define type that includes optional protoSkillId and proficiency
+type Filter = {
+  isActive: boolean
+  categoryId?: string
+  skillCategoryId? : mongoose.Types.ObjectId
+  protoSkillId?: string
+  proficiency?: string
 }
 
-export const getMentorsByUuid = async (req: MentorSearchRequest, res: Response) => {
-  let query = req.query.query;
+// define type for elements in the uuids array
+type UuidType = {
+  mentorUuid: string;
+}
 
-  // convert query to array of strings
-  if (typeof query === 'string') {
-    // split by comma if it's a single string with comma separated UUIDs
-    query = query.split(',').map(uuid => uuid.trim());
-  } else if (Array.isArray(query)) {
-    // if it's already an array, use it directly
-    query = query.map(uuid => uuid.trim());
-  } else {
-    // if query is not provided or invalid
-    return res.status(400).json({ error: "Query parameter must be a non-empty array of UUID strings" });
+export const getMentorsByUuid = async (req: Request, res: Response) => {
+  const data = req.body
+
+  if (!data) {
+    return res.status(400).json({error: 'Mentors data is required'})
   }
 
-  // check if the array is non-empty and contains only valid UUIDs
-  if (query.length === 0 || !query.every(uuid => typeof uuid === 'string')) {
-    return res.status(400).json({ error: "Query parameter must be a non-empty array of UUID strings" });
+  const {categoryId, protoSkillId, proficiency} = data
+
+  // initialize filter
+  const filter: Filter = {isActive: true}
+
+  // create array from data.uuids object key
+  const uuids = data.uuids.map((id: UuidType )=> id.mentorUuid)
+
+  if (protoSkillId) {
+    filter.protoSkillId = protoSkillId
+  }
+
+  if (proficiency) {
+    filter.proficiency = proficiency
   }
 
   try {
-    console.log("🔎 Received search request with UUID array:", query);
-
-    // use $in operator to match UUIDs in the array
+    // 
     const mentors = await userModel.find(
       {
         role: "mentor",
-        uuid: { $in: query },
+        uuid: {$in: uuids} // match documents uuid with uuids from the array
       },
       {
-        _id: 0, // Exclude the _id field
+        _id: 0, // exclude the _id field
       }
     ).sort({userName: 1})
 
-    console.log(`✅ Found ${mentors.length} mentors matching the query`);
+    console.log(`✅ Found ${mentors.length} mentors matching the query`)
 
-    // Fetch skills for each mentor
+    // fetch protoSkillId by skillCategoryId
+    if (categoryId) {
+      const category = await protoSkillModel.findOne({
+        skillCategoryId: categoryId
+      }).select('_id')
+
+      filter.protoSkillId = category._id
+    }
+
+    console.log('✅ getMentorsByUuid_finalFilterObject', filter)
+
+    // fetch skills for each mentor
     const mentorsWithSkills = await Promise.all(
       mentors.map(async (mentor) => {
         const skills = await userSkillModel
-          .find({ mentorUuid: mentor.uuid, isActive: true })
-          .populate({
-            path: "protoSkillId",
-            populate: {
-              path: "skillCategoryId",
-            },
-          });
+        .find({...filter, mentorUuid: mentor.uuid})
+        .populate({
+          path: "protoSkillId",
+          populate: {
+            path: "skillCategoryId",
+          }
+        })
 
-        console.log(`✅ Found ${skills.length} skills for mentor: ${mentor.uuid}`);
+        console.log(
+          `✅ Found ${skills.length} skills for mentor: ${mentor.uuid}`
+        )
 
         return {
           ...mentor.toObject(),
           skills: skills.length > 0 ? skills : null,
-        };
+        }
       })
-    );
+    )
 
-    console.log("✅ Successfully fetched mentors and their skills");
-    res.status(200).json(mentorsWithSkills);
+    console.log("✅ Successfully fetched mentors and their skills")
+    res.status(200).json(mentorsWithSkills)
   } catch (error) {
-    console.error("❌ Error searching mentors:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("❌ Error searching mentors:", error)
+    res.status(500).json({ error: "Internal server error" })
   }
-};
+}
