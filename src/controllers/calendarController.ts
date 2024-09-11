@@ -328,3 +328,28 @@ export const getBookingDetails = async (req, res) => {
 //     res.status(500).json({ message: "Server error" });
 //   }
 // };
+
+// cancel a session ==================================================
+
+// Delete a calendar event (mentor deletes an available slot) ==================
+export const deleteCalendarEvent = async (req: Request, res: Response) => {
+  try {
+    if (req.userRole !== "mentor") {
+      return res
+        .status(403)
+        .json({ message: "Only mentors can delete available time slots." });
+    } // Check if the user is a mentor
+
+    const event = await Calendar.findById(req.params.id);
+    if (!event || event.status !== "available") {
+      return res.status(404).json({ message: "Time slot not available or already booked." });
+    } // Check if the event exists and is available
+
+    await Calendar.deleteOne({ _id: req.params.id }); // Use deleteOne method
+    console.log("✅ Calendar event deleted:", event);
+    res.status(200).json({ message: "Calendar event deleted successfully." });
+  } catch (error) {
+    console.error("❌ Error deleting calendar event:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
