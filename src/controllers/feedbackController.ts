@@ -121,7 +121,7 @@ export const getPublicFeedbacks = async (req: Request, res: Response) => {
         // Fetch the mentor's userName from userModel
         const mentor = await userModel
           .findOne({ uuid: mentorUuid })
-          .select("uuid userName");
+          .select("uuid userName image");
 
         if (!mentor) {
           console.log(`❌ Mentor with UUID ${mentorUuid} not found`);
