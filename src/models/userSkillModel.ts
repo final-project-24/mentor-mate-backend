@@ -59,7 +59,10 @@ userSkillSchema.index(
     protoSkillId: 1,
     proficiency: 1
   },
-  { unique: true }
+  { 
+    unique: true,
+    partialFilterExpression: {isActive: true} // TODO: index only when isActive is true, this will prevent a situation when new userSkill based on the same proto skills has the same proficiency as the equivalent inactive userSkill resulting in error 11000
+  }
 )
 
 // ! static method to verify user skill IDs

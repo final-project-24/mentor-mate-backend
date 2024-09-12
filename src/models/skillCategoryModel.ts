@@ -24,12 +24,12 @@ const skillCategorySchema = new Schema<ISkillCategory>({
   skillCategoryTitle: {
     type: String,
     required: true,
-    unique: true
+    // unique: true
   },
   // this title field is used internally in BE for comparison purposes
   skillCategoryTitleLower: {
     type: String,
-    unique: true
+    // unique: true
   },
   skillCategoryDescription: {
     type: String
@@ -41,6 +41,19 @@ const skillCategorySchema = new Schema<ISkillCategory>({
 }, {
   timestamps: true
 })
+
+// ! index method (has to be placed right after schema definition)
+// restrict index on database level to allow only one proficiency enum value per prototypeSkill and mentor
+skillCategorySchema.index(
+  {
+    skillCategoryTitle: 1,
+    skillCategoryTitleLower: 1
+  },
+  { 
+    unique: true,
+    partialFilterExpression: {isActive: true} // TODO: index only when isActive is true, this will prevent a situation when new userSkill based on the same proto skills has the same proficiency as the equivalent inactive userSkill resulting in error 11000
+  }
+)
 
 // ! static method to check for category title conflict
 skillCategorySchema.statics.skillCategoryAlreadyExistsByTitle = async function (categoryTitle) {

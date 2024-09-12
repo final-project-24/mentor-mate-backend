@@ -27,12 +27,12 @@ const protoSkillSchema = new Schema<IProtoSkill>({
   protoSkillTitle : {
     type: String,
     required: true,
-    unique: true
+    // unique: true
   },
   // this title prop is used internally in BE for comparison purposes
   protoSkillTitleLower: {
     type: String,
-    unique: true
+    // unique: true
   },
   protoSkillDescription: {
     type: String,
@@ -49,6 +49,19 @@ const protoSkillSchema = new Schema<IProtoSkill>({
 }, {
   timestamps: true
 })
+
+// ! index method (has to be placed right after schema definition)
+// restrict index on database level to allow only one proficiency enum value per prototypeSkill and mentor
+protoSkillSchema.index(
+  {
+    protoSkillTitle: 1,
+    protoSkillTitleLower: 1
+  },
+  { 
+    unique: true,
+    partialFilterExpression: {isActive: true} // TODO: index only when isActive is true, this will prevent a situation when new userSkill based on the same proto skills has the same proficiency as the equivalent inactive userSkill resulting in error 11000
+  }
+)
 
 // ! static method to verify ID
 protoSkillSchema.statics.verifySkillCategoryId = function (id) {
