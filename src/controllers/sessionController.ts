@@ -1,11 +1,65 @@
-import { Request, Response } from 'express';
-import Session from '../models/sessionModel.js';
+import { Request, Response } from "express";
+import Session from "../models/sessionModel.js";
 import Calendar from "../models/calendarModel.js";
 import User from "../models/userModel.js";
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 import userSkillModel from "../models/userSkillModel.js";
 import protoSkillModel from "../models/protoSkillModel.js";
 import skillCategoryModel from "../models/skillCategoryModel.js";
+
+// Get available upcoming events for a mentor ==================================
+
+export const getAvailableUpcomingEventsForMentor = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    console.log(
+      "🔍 Incoming request to get available upcoming events for mentor"
+    );
+
+    const userId = req.userId; // Extract userId from the request
+    console.log(`🔎 Extracted userId from request: ${userId}`);
+
+    const currentDate = new Date(); // Get the current date
+    console.log(`🔎 Current date: ${currentDate}`);
+
+    // Check if userId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.log("❌ Invalid user ID.");
+      return res.status(400).json({ message: "Invalid user ID." });
+    }
+
+    // Define the query object
+    const query = {
+      mentorId: userId,
+      status: "available",
+      start: { $gt: currentDate },
+    };
+
+    const events = await Calendar.find(query).populate(
+      "mentorId",
+      "image userName role"
+    );
+
+    console.log(`🔎 Found ${events.length} available upcoming events`);
+
+    if (!events.length) {
+      console.log("🔎 No available upcoming events found for this mentor.");
+      return res
+        .status(404)
+        .json({
+          message: "No available upcoming events found for this mentor.",
+        });
+    }
+
+    res.status(200).json(events);
+    console.log("✅ Successfully fetched available upcoming events for mentor");
+  } catch (error) {
+    console.error("❌ Error fetching available upcoming events:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 // Get all upcoming sessions ==================================================
 
@@ -122,9 +176,14 @@ export const cancelSession = async (req: Request, res: Response) => {
     console.log(`🔎 Current date: ${currentDate}`);
 
     //Check if userId and sessionId are valid ObjectId
-    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(sessionId)) {
+    if (
+      !mongoose.Types.ObjectId.isValid(userId) ||
+      !mongoose.Types.ObjectId.isValid(sessionId)
+    ) {
       console.log("❌ Invalid user ID or session ID.");
-      return res.status(400).json({ message: "Invalid user ID or session ID." });
+      return res
+        .status(400)
+        .json({ message: "Invalid user ID or session ID." });
     }
 
     // Find the session
@@ -137,7 +196,7 @@ export const cancelSession = async (req: Request, res: Response) => {
     console.log(`🔎 Session found: ${JSON.stringify(session)}`);
 
     // Check if the session is already canceled
-    if (session.status === 'canceled') {
+    if (session.status === "canceled") {
       console.log("❌ Session is already canceled.");
       return res.status(400).json({ message: "Session is already canceled." });
     }
@@ -148,12 +207,19 @@ export const cancelSession = async (req: Request, res: Response) => {
     const hoursDifference = timeDifference / (1000 * 60 * 60);
 
     if (hoursDifference < 24) {
-      console.log("❌ Cancellation must be done at least 24 hours before the session starts.");
-      return res.status(400).json({ message: "Cancellation must be done at least 24 hours before the session starts." });
+      console.log(
+        "❌ Cancellation must be done at least 24 hours before the session starts."
+      );
+      return res
+        .status(400)
+        .json({
+          message:
+            "Cancellation must be done at least 24 hours before the session starts.",
+        });
     }
 
     // Update the session status to 'canceled'
-    session.status = 'canceled';
+    session.status = "canceled";
     await createFreeSlotToken(userId);
     // session.canceledBy = new mongoose.Types.ObjectId(userId); // Convert userId to ObjectId
     await session.save();
@@ -166,11 +232,7 @@ export const cancelSession = async (req: Request, res: Response) => {
   }
 };
 
-    const createFreeSlotToken = async (userId) => {
-    // Implement your logic to issue a free slot token or equivalent here
-    console.log(`Issuing free slot token for user ${userId}`);
-   };
-
-
-
-
+const createFreeSlotToken = async (userId) => {
+  // Implement your logic to issue a free slot token or equivalent here
+  console.log(`Issuing free slot token for user ${userId}`);
+};

@@ -5,6 +5,7 @@ import {
   addCalendarEvent,
   bookCalendarEvent,
   getBookingDetails,
+  deleteCalendarEvent,
   // getUpcomingSessions,
   // getPastSessions,
 } from "../controllers/calendarController.js";
@@ -16,6 +17,9 @@ const calendarRoutes = express.Router();
 
 // // http://localhost:4000/app/calendar/past-sessions
 // calendarRoutes.get("/past-sessions", verifyToken, getPastSessions);
+
+// http://localhost:4000/app/calendar/:id
+calendarRoutes.delete("/:id", verifyToken, deleteCalendarEvent);
 
 // http://localhost:4000/app/calendar/:mentorUuid
 calendarRoutes.get("/:mentorUuid", verifyToken, getMentorAvailability);

@@ -1,6 +1,7 @@
 import express from "express";
 import { verifyToken } from "../middleware/verifyTokenMiddleware.js";
 import {
+  getAvailableUpcomingEventsForMentor,
   getUpcomingSessions,
   getPastSessions,
   cancelSession,
@@ -9,6 +10,13 @@ import {
 
 const sessionRoutes = express.Router();
 
+// http://localhost:4000/app/session/available-upcoming-events
+sessionRoutes.get(
+  "/available-upcoming-events",
+  verifyToken,
+  getAvailableUpcomingEventsForMentor
+);
+
 // http://localhost:4000/app/calendar/upcoming-sessions
 sessionRoutes.get("/upcoming-sessions", verifyToken, getUpcomingSessions);
 
@@ -16,10 +24,9 @@ sessionRoutes.get("/upcoming-sessions", verifyToken, getUpcomingSessions);
 sessionRoutes.get("/past-sessions", verifyToken, getPastSessions);
 
 // http://localhost:4000/app/session/cancel-session/:id
-sessionRoutes.delete('/cancel-session/:id', verifyToken, cancelSession);
+sessionRoutes.delete("/cancel-session/:id", verifyToken, cancelSession);
 
 // http://localhost:4000/app/session/confirm-free-slot
 // sessionRoutes.post('/confirm-free-slot', verifyToken, confirmFreeSlotBooking);
 
 export default sessionRoutes;
-

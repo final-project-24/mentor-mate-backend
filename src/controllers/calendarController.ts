@@ -114,6 +114,15 @@ export const addCalendarEvent = async (req: Request, res: Response) => {
 
 // Book a calendar event (mentee books a slot) ==================================
 
+// const generateRandomGoogleMeetCode = () => {
+//   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+//   let code = "";
+//   for (let i = 0; i < 10; i++) {
+//     code += chars.charAt(Math.floor(Math.random() * chars.length));
+//   }
+//   return `${code.slice(0, 3)}-${code.slice(3, 7)}-${code.slice(7, 10)}`;
+// };
+
 // Marina logic ========
 const generateJitsiLink = (roomName) => {
   return `https://meet.jit.si/${roomName}`;
@@ -122,6 +131,11 @@ const generateJitsiLink = (roomName) => {
 const generateGoogleMeetLink = (roomName) => {
   return `https://meet.google.com/${roomName}`;
 };
+
+// const generateGoogleMeetLink = () => {
+//   const roomName = generateRandomGoogleMeetCode();
+//   return `https://meet.google.com/${roomName}`;
+// };
 // =====================
 
 export const bookCalendarEvent = async (req, res) => {
@@ -170,7 +184,8 @@ export const bookCalendarEvent = async (req, res) => {
 
     // Marina logic ========
     const jitsiLink = generateJitsiLink(event._id);
-    const googleMeetLink = generateGoogleMeetLink(event._id);
+    // const googleMeetLink = generateGoogleMeetLink(event._id);
+    const googleMeetLink = generateGoogleMeetLink();
     // =====================
 
     event.status = "pending"; // Set the status to pending
@@ -314,4 +329,27 @@ export const getBookingDetails = async (req, res) => {
 //   }
 // };
 
+// cancel a session ==================================================
 
+// Delete a calendar event (mentor deletes an available slot) ==================
+export const deleteCalendarEvent = async (req: Request, res: Response) => {
+  try {
+    if (req.userRole !== "mentor") {
+      return res
+        .status(403)
+        .json({ message: "Only mentors can delete available time slots." });
+    } // Check if the user is a mentor
+
+    const event = await Calendar.findById(req.params.id);
+    if (!event || event.status !== "available") {
+      return res.status(404).json({ message: "Time slot not available or already booked." });
+    } // Check if the event exists and is available
+
+    await Calendar.deleteOne({ _id: req.params.id }); // Use deleteOne method
+    console.log("✅ Calendar event deleted:", event);
+    res.status(200).json({ message: "Calendar event deleted successfully." });
+  } catch (error) {
+    console.error("❌ Error deleting calendar event:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
