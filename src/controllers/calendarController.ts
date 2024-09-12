@@ -184,8 +184,8 @@ export const bookCalendarEvent = async (req, res) => {
 
     // Marina logic ========
     const jitsiLink = generateJitsiLink(event._id);
-    // const googleMeetLink = generateGoogleMeetLink(event._id);
-    const googleMeetLink = generateGoogleMeetLink();
+    const googleMeetLink = generateGoogleMeetLink(event._id);
+    // const googleMeetLink = generateGoogleMeetLink();
     // =====================
 
     event.status = "pending"; // Set the status to pending
