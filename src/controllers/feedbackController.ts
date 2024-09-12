@@ -1,7 +1,11 @@
 import { Request, Response } from "express";
 import Feedback from "../models/feedbackModel.js";
+import userModel from "../models/userModel.js";
+import userSkillModel from "../models/userSkillModel.js";
 
 // submit feedback ============================================================
+// Mentors are useing the bookingId and the menteeUuid to submit feedback
+// Mentees are using the bookingId and the mentorUuid to submit feedback
 
 export const submitFeedback = async (req: Request, res: Response) => {
   try {
@@ -34,6 +38,8 @@ export const submitFeedback = async (req: Request, res: Response) => {
 };
 
 // get feedback for a specific booking ========================================
+// Mentors are using the bookingId and their UUID to fetch feedback
+// Mentees are using the bookingId and their UUID to fetch feedback
 
 export const getFeedbacks = async (req: Request, res: Response) => {
   try {
@@ -61,5 +67,86 @@ export const getFeedbacks = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("❌ Error fetching feedback:", error);
     res.status(500).json({ message: "Error fetching feedback" });
+  }
+};
+
+// get feedback by rating for mentor ==========================================
+
+// Fetch feedbacks with publicFeedback true and mentorUuid
+export const getPublicFeedbacks = async (req: Request, res: Response) => {
+  try {
+    console.log("🔎 Fetching public feedbacks with mentorUuid...");
+
+    // Fetch feedbacks with publicFeedback true and mentorUuid
+    const feedbacks = await Feedback.find({
+      publicFeedback: true,
+      mentorUuid: { $exists: true },
+    });
+
+    if (feedbacks.length === 0) {
+      console.log("❌ No public feedbacks found");
+      return res.status(404).json({ message: "No public feedbacks found" });
+    }
+
+    console.log(
+      `🔎 Found ${feedbacks.length} feedbacks. Grouping by mentorUuid and selecting highest rated feedback...`
+    );
+
+    // Group feedbacks by mentorUuid and select the highest rated feedback for each mentor
+    const feedbackMap = new Map();
+    feedbacks.forEach((feedback) => {
+      const { mentorUuid, rating } = feedback;
+      if (
+        !feedbackMap.has(mentorUuid) ||
+        feedbackMap.get(mentorUuid).rating < rating
+      ) {
+        feedbackMap.set(mentorUuid, feedback);
+      }
+    });
+
+    console.log(
+      `🔎 Grouped feedbacks into ${feedbackMap.size} unique mentors. Limiting results to 10...`
+    );
+
+    // Convert the map to an array and limit the results to 10
+    const limitedFeedbacks = Array.from(feedbackMap.values()).slice(0, 10);
+
+    console.log("🔎 Fetching mentor details and skills for each feedback...");
+
+    // Fetch mentor details and skills for each feedback
+    const feedbacksWithMentorDetails = await Promise.all(
+      limitedFeedbacks.map(async (feedback) => {
+        const { mentorUuid } = feedback;
+
+        // Fetch the mentor's userName from userModel
+        const mentor = await userModel
+          .findOne({ uuid: mentorUuid })
+          .select("uuid userName");
+
+        if (!mentor) {
+          console.log(`❌ Mentor with UUID ${mentorUuid} not found`);
+          return { ...feedback.toObject(), mentor: null, skills: [] };
+        }
+
+        // Fetch the skills for the mentor
+        const skills = await userSkillModel
+          .find({ mentorUuid, isActive: true })
+          .populate({
+            path: "protoSkillId",
+            populate: {
+              path: "skillCategoryId",
+            },
+          });
+
+        console.log(`✅ Fetched details for mentor UUID ${mentorUuid}`);
+        return { ...feedback.toObject(), mentor, skills };
+      })
+    );
+
+    console.log("✅ Successfully fetched public feedbacks with mentor details and skills");
+    res.status(200).json(feedbacksWithMentorDetails);
+  } catch (error) {
+    console.error("❌ Error fetching public feedbacks:", error);
+    res.status(500).json({ message: "Error fetching public feedbacks" });
   }
 };
