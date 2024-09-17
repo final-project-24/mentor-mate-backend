@@ -146,7 +146,7 @@ export const deleteProtoSkill = async (req: Request, res: Response) => {
     const userSkillCount = await userSkillModel.countDocuments({protoSkillId: id})
 
     if (userSkillCount > 0) {
-      return res.status(400).json({error: 'Cannot delete this skill as it is already in use by one or more mentors'})
+      return res.status(400).json({error: 'Cannot delete skill used by one or more mentors'})
     }
 
     // deactivate the skill category instead of deleting it
