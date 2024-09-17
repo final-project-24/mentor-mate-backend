@@ -101,7 +101,7 @@ export const deleteSkillCategory = async (req: Request, res: Response) => {
     const skillCount = await protoSkillModel.countDocuments({skillCategoryId: id})
 
     if (skillCount > 0) {
-      return res.status(400).json({error: 'Cannot delete this skill category as it is already in use by one or more skills'})
+      return res.status(400).json({error: 'Cannot delete category used by one or more skills'})
     }
 
     // deactivate the skill category instead of deleting it

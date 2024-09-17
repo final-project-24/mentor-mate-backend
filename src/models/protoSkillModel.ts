@@ -89,16 +89,22 @@ protoSkillSchema.statics.validateSkillChanges = async function (data, id) {
     throw new Error('Provided skill ID does not match any skill')
 
   // check for other skills with the same title
-  const skillExistsByTitle = await this.findOne({protoSkillTitleLower: data.protoSkillTitle.toLowerCase()})
+  const skillExistsByTitle = await this.findOne({
+    protoSkillTitleLower: data.protoSkillTitle.toLowerCase(), 
+    _id: {$ne: id}, // $ne selector (not equal) excludes the documents which _id is equal to id
+    isActive: true
+  })
 
   if (skillExistsByTitle)
     throw new Error('Skill with this title already exists')
 
-  // check if updated skill differs from original skill
-  const isDifferent = Object.keys(data).some(key => existingSkill[key] !== data[key])
+  // compare the fields that are edited
+  const isDifferentTitle = existingSkill.protoSkillTitle !== data.protoSkillTitle
+  const isDifferentDescription = existingSkill.protoSkillDescription !== data.protoSkillDescription
 
-  if (!isDifferent)
+  if (!isDifferentTitle && !isDifferentDescription) {
     throw new Error('No skill changes were detected')
+  }
 }
 
 // ! pre hooks
@@ -107,25 +113,26 @@ protoSkillSchema.pre<IProtoSkill>('save', function (next) {
   this.protoSkillTitle = capitalizeFirstChar(this.protoSkillTitle)
   this.protoSkillTitleLower = this.protoSkillTitle.toLowerCase()
 
-  if (this.protoSkillDescription)
+  if (this.protoSkillDescription.length > 0)
     this.protoSkillDescription = capitalizeFirstChar(this.protoSkillDescription)
 
   next()
 })
 
-// 'findOneAndUpdate' pre hook
-// _update object holds key value pairs for the object specified in 'findOnceAndUpdate' query
+// * 'findOneAndUpdate' pre hook
+// _update object holds key value pairs for the object specified in 'findOneAndUpdate' query
+// in the controller, the method: 'findByIdAndUpdate' is used. This method is build on top of 'findOneAndUpdate' therefore it triggers this hook
 protoSkillSchema.pre<IProtoSkillQuery>('findOneAndUpdate', function (next) {
   if (this._update.protoSkillTitle) {
-    this._update.protoSkillTitle = capitalizeFirstChar(this._update.protoSkillTitle);
-    this._update.protoSkillTitleLower = this._update.protoSkillTitleLower.toLowerCase();
+    this._update.protoSkillTitle = capitalizeFirstChar(this._update.protoSkillTitle)
+    this._update.protoSkillTitleLower = this._update.protoSkillTitle.toLowerCase()
   }
 
-  if (this._update.protoSkillDescription) {
-    this._update.protoSkillDescription = capitalizeFirstChar(this._update.protoSkillDescription);
+  if (this._update.protoSkillDescription && this._update.protoSkillDescription.length > 0) {
+    this._update.protoSkillDescription = capitalizeFirstChar(this._update.protoSkillDescription)
   }
 
-  next();
+  next()
 })
 
 // ! set hook
