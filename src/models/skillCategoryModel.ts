@@ -75,7 +75,11 @@ skillCategorySchema.statics.validateCategoryChanges = async function (data, id) 
     throw new Error('Provided category ID does not match any category')
 
   // check for other categories with the same title
-  const categoryExistsByTitle = await this.findOne({skillCategoryTitleLower: data.skillCategoryTitle.toLowerCase()})
+  const categoryExistsByTitle = await this.findOne({
+    skillCategoryTitleLower: data.skillCategoryTitle.toLowerCase(),
+    _id: {$ne: id},
+    isActive: true // $ne selector (not equal) excludes the documents which _id is equal to id
+  })
 
   if (categoryExistsByTitle)
     throw new Error('Category with this title already exists')
@@ -99,19 +103,20 @@ skillCategorySchema.pre<ISkillCategory>('save', function (next) {
   next()
 })
 
-// 'findOneAndUpdate' pre hook
+// * 'findOneAndUpdate' pre hook
 // _update object holds key value pairs for the object specified in 'findOnceAndUpdate' query
+// in the controller, the method: 'findByIdAndUpdate' is used. This method is build on top of 'findOneAndUpdate' therefore it triggers this hook
 skillCategorySchema.pre<ISkillCategoryQuery>('findOneAndUpdate', function (next) {
   if (this._update.skillCategoryTitle) {
-    this._update.skillCategoryTitle = capitalizeFirstChar(this._update.skillCategoryTitle);
-    this._update.skillCategoryTitleLower = this._update.skillCategoryTitle.toLowerCase();
+    this._update.skillCategoryTitle = capitalizeFirstChar(this._update.skillCategoryTitle)
+    this._update.skillCategoryTitleLower = this._update.skillCategoryTitle.toLowerCase()
   }
 
-  if (this._update.skillCategoryDescription) {
-    this._update.skillCategoryDescription = capitalizeFirstChar(this._update.skillCategoryDescription);
+  if (this._update.skillCategoryDescription && this._update.skillCategoryDescription.length > 0) {
+    this._update.skillCategoryDescription = capitalizeFirstChar(this._update.skillCategoryDescription)
   }
 
-  next();
+  next()
 })
 
 // ! set hook
