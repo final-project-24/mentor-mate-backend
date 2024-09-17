@@ -22,6 +22,7 @@ import {
   changeUserName,
   changePassword,
   changeEmail,
+  changeUserImage,
 } from "../controllers/userController.js";
 
 // Routes =================================================
@@ -70,6 +71,9 @@ userRoutes.put("/change-password", verifyToken, changePassword);
 
 // http://localhost:4000/app/user/change-email
 userRoutes.put("/change-email", verifyToken, changeEmail);
+
+// http://localhost:4000/app/user/change-image
+userRoutes.put("/change-image", verifyToken, changeUserImage);
 
 // Exports ==============================================
 
