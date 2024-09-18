@@ -143,7 +143,10 @@ export const deleteProtoSkill = async (req: Request, res: Response) => {
     //   : res.status(404).json({error: 'Skill not found'})
 
     // ! soft delete
-    const userSkillCount = await userSkillModel.countDocuments({protoSkillId: id})
+    const userSkillCount = await userSkillModel.countDocuments({
+      protoSkillId: id,
+      isActive: true
+    })
 
     if (userSkillCount > 0) {
       return res.status(400).json({error: 'Cannot delete skill used by one or more mentors'})
